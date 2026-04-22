@@ -1,0 +1,215 @@
+<!-- ✅ Reuse Booking Navbar for Consistent Upper Section -->
+<app-booking-navbar></app-booking-navbar>
+
+<div class="review-wrapper" *ngIf="bookingData">
+
+  <div class="review-layout">
+
+    <!-- ✅ LEFT SUMMARY -->
+    <div class="summary-card">
+
+      <!-- ✅ Flight Details -->
+
+      <!-- ✅ Round Trip -->
+      <ng-container *ngIf="bookingData?.tripType === 'round'; else oneWayBlock">
+
+        <!-- Departure Block -->
+        <div class="flight-review-block premium-flight-block">
+          <div class="flight-header">
+            ✈ Departure
+            <div class="flight-date">
+              {{ bookingData?.departure?.flight?.departuredate || bookingData?.departure?.flight?.DepartureDate | date:'EEE, dd MMM yyyy' }}
+            </div>
+          </div>
+
+          <div class="flight-main-row">
+            <div class="flight-time-hero">
+              {{ bookingData?.departure?.flight?.departTime }}
+            </div>
+
+            <div class="flight-route-hero">
+              {{ bookingData?.departure?.flight?.departure }}
+ 
+              {{ bookingData?.departure?.flight?.arrival }}
+            </div>
+
+            <div class="flight-time-hero">
+              {{ bookingData?.departure?.flight?.arrivalTime }}
+            </div>
+          </div>
+
+          <div class="flight-meta-line">
+            {{ bookingData?.departure?.flight?.airline }}
+            • {{ bookingData?.departure?.flight?.flightno }}
+            • {{ bookingData?.departure?.fare?.name }}
+            • {{ bookingData?.departure?.flight?.flighttype }}
+          </div>
+        </div>
+
+        <!-- Return Block -->
+        <div class="flight-review-block premium-flight-block" style="margin-top:16px;">
+          <div class="flight-header">
+            ✈ Return
+            <div class="flight-date">
+              {{ bookingData?.return?.flight?.arrivaldate || bookingData?.return?.flight?.ArrivalDate | date:'EEE, dd MMM yyyy' }}
+            </div>
+          </div>
+
+          <div class="flight-main-row">
+            <div class="flight-time-hero">
+              {{ bookingData?.return?.flight?.departTime }}
+            </div>
+
+            <div class="flight-route-hero">
+              {{ bookingData?.return?.flight?.departure }}
+              {{ bookingData?.return?.flight?.arrival }}
+            </div>
+
+            <div class="flight-time-hero">
+              {{ bookingData?.return?.flight?.arrivalTime }}
+            </div>
+          </div>
+
+          <div class="flight-meta-line">
+            {{ bookingData?.return?.flight?.airline }}
+            • {{ bookingData?.return?.flight?.flightno }}
+            • {{ bookingData?.return?.fare?.name }}
+            • {{ bookingData?.return?.flight?.flighttype }}
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- ✅ One Way -->
+      <ng-template #oneWayBlock>
+        <div class="flight-review-block premium-flight-block">
+          <div class="flight-header">
+            ✈ Departure
+            <div class="flight-date">
+              {{
+                (bookingData?.flight?.departuredate ||
+                  bookingData?.flight?.DepartureDate ||
+                  bookingData?.departuredate ||
+                  bookingData?.departureDate ||
+                  bookingData?.departDate) | date: 'EEE, dd MMM yyyy'
+              }}
+            </div>
+          </div>
+
+          <div class="flight-main-row">
+            <div class="flight-time-hero">
+              {{ bookingData?.flight?.departTime || bookingData?.departTime || '' }}
+            </div>            
+          </div>
+
+          <div class="flight-meta-line">
+            {{
+              bookingData?.flight?.airline ||
+                bookingData?.airlinename ||
+                bookingData?.airline ||
+                ''
+            }}
+            •
+            {{
+              bookingData?.flight?.flightno ||
+                bookingData?.flightno ||
+                bookingData?.flightNumber ||
+                ''
+            }}
+            • {{ bookingData?.fare?.name || bookingData?.seatType || '' }}
+            •
+            {{
+              bookingData?.flight?.flighttype ||
+                bookingData?.flighttype ||
+                bookingData?.flightType ||
+                'Non-stop'
+            }}
+          </div>
+        </div>
+      </ng-template>
+
+      <hr>
+
+      <h4>Passengers</h4>
+
+      <div *ngFor="let p of passengers" class="passenger-summary premium-passenger">
+        <div class="passenger-top">
+          <div class="passenger-name">
+            {{ p.firstName }} {{ p.lastName }}
+          </div>
+          <div class="passenger-meta">
+            {{ p.type | titlecase }} • Age {{ p.age }}
+          </div>
+        </div>
+
+        <div class="addons premium-addons">
+          <span class="addon-badge">
+            🎟 Seat:
+            {{ p.seatPreference ? (p.seatPreference | titlecase) : 'No Seat Selected' }}
+          </span>
+
+          <span class="addon-badge">
+            🍽 Meal:
+            {{ p.mealPreference ? (p.mealPreference | titlecase) : 'No Meal Selected' }}
+          </span>
+
+          <span class="addon-badge">
+            🧳 Baggage:
+            {{ p.baggage ? '+10kg Added' : 'Standard Allowance' }}
+          </span>
+        </div>
+      </div>
+
+      <hr>
+
+      <h4>Contact</h4>
+      <p>{{ contact?.email }}</p>
+      <p>{{ contact?.phone }}</p>
+
+    </div>
+
+    <!-- ✅ RIGHT PRICING -->
+    <div class="price-card">
+
+      <h3>Payment Summary</h3>
+
+      <div class="row">
+        <span>Base Fare</span>
+        <span>₹ {{ totals?.baseTotal | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="row">
+        <span>Add-ons</span>
+        <span>₹ {{ totals?.addonsTotal | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="row">
+        <span>Taxes</span>
+        <span>₹ {{ totals?.taxAmount | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="row">
+        <span>Convenience Fee</span>
+        <span>₹ {{ totals?.convenienceFee | number:'1.0-0' }}</span>
+      </div>
+
+      <hr>
+
+      <div class="row grand">
+        <span>Total Payable</span>
+        <span>₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
+      </div>
+
+      <button class="confirm-btn" (click)="confirmBooking()">
+        Confirm Booking
+      </button>
+
+      <button class="modify-btn" (click)="goBackToBooking()">
+        Modify Details
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

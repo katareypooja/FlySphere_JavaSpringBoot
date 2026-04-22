@@ -1,0 +1,161 @@
+<div class="auth-wrapper">
+  <div class="auth-layout">
+
+    <!-- ✅ LEFT SIDE -->
+    <div class="brand-side">
+      <h1 class="brand-title">✈ Join FlySphere</h1>
+      <p class="brand-slogan">Start Your Journey Today</p>
+
+      <div class="promo-banner">
+        🎁 Sign up & Get 20% Welcome Bonus
+        <span>Members Only Offer</span>
+      </div>
+
+      <p class="welcome-line">
+        Create your FlySphere account and unlock:
+      </p>
+
+      <ul class="benefits-list">
+        <li>✅ Exclusive travel deals</li>
+        <li>✅ Early access to discounts</li>
+        <li>✅ Personalized flight offers</li>
+        <li>✅ Faster bookings & secure payments</li>
+      </ul>
+    </div>
+
+    <!-- ✅ RIGHT SIDE CARD -->
+    <div class="card modern-auth-card">
+      <h2 class="auth-heading">Create Account</h2>
+
+      <form (ngSubmit)="onRegister()">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label class="input-label">First Name*</label>
+            <input type="text" [(ngModel)]="firstName" name="firstName" required />
+          </div>
+
+          <div class="form-group">
+            <label class="input-label">Last Name*</label>
+            <input type="text" [(ngModel)]="lastName" name="lastName" required />
+          </div>
+
+          <div class="form-group">
+            <label class="input-label">User ID*</label>
+            <input type="text" [(ngModel)]="userId" name="userId" required />
+          </div>
+
+          <div class="form-group">
+            <label class="input-label">Phone Number*</label>
+
+            <div class="phone-wrapper">
+
+              <div class="country-dropdown">
+
+                <div class="selected-country" (click)="toggleCountryDropdown()">
+                  <img *ngIf="selectedCountry"
+                       [src]="selectedCountry.flag"
+                       width="20"
+                       height="14"
+                       style="margin-right:6px; vertical-align:middle;" />
+                  {{ countryCode }} ▼
+                </div>
+
+                <div class="dropdown-menu" *ngIf="showCountryDropdown">
+
+                  <input
+                    type="text"
+                    placeholder="Search country..."
+                    [(ngModel)]="countrySearch"
+                    name="countrySearch"
+                    class="country-search" />
+
+                  <div class="country-option"
+                       *ngFor="let country of filteredCountries"
+                       (click)="selectCountry(country)">
+                    <img [src]="country.flag"
+                         width="20"
+                         height="14"
+                         style="margin-right:6px; vertical-align:middle;" />
+                    {{ country.name }} ({{ country.code }})
+                  </div>
+
+                </div>
+              </div>
+
+              <input
+                type="tel"
+                [(ngModel)]="phone"
+                name="phone"
+                required />
+            </div>
+          </div>
+
+        </div>
+
+        <label class="input-label">Email*</label>
+        <input type="email" [(ngModel)]="email" name="email" required />
+
+        <label class="input-label">Password*</label>
+        <input type="password"
+               [(ngModel)]="password"
+               name="password"
+               required />
+
+        <div class="password-checklist" *ngIf="password">
+          <div [ngClass]="hasMinLength ? 'valid' : 'invalid'">
+            {{ hasMinLength ? '✅' : '❌' }} Minimum 8 characters
+          </div>
+          <div [ngClass]="hasLetter ? 'valid' : 'invalid'">
+            {{ hasLetter ? '✅' : '❌' }} At least 1 letter
+          </div>
+          <div [ngClass]="hasNumber ? 'valid' : 'invalid'">
+            {{ hasNumber ? '✅' : '❌' }} At least 1 number
+          </div>
+        </div>
+
+        <label class="input-label">Confirm Password*</label>
+        <input type="password"
+               [(ngModel)]="confirmPassword"
+               name="confirmPassword"
+               required />
+
+        <div class="match-indicator" *ngIf="confirmPassword">
+          <span [ngClass]="{ 'match': passwordsMatch, 'no-match': !passwordsMatch }">
+            {{ passwordsMatch ? 'Passwords match ✅' : 'Passwords do not match ❌' }}
+          </span>
+        </div>
+
+        <div class="terms-row">
+          <label class="terms-box">
+            <input type="checkbox"
+                   [(ngModel)]="termsAccepted"
+                   name="termsAccepted"
+                   required />
+            I agree to the
+            <a routerLink="/terms">Terms & Conditions</a>
+            and
+            <a routerLink="/privacy">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="submit"
+                class="purple-btn"
+                [disabled]="!canRegister">
+          Register
+        </button>
+
+      </form>
+
+      <p class="bottom-text">
+        Already have an account?
+        <a routerLink="/login">Login</a>
+      </p>
+
+      <p class="error-msg">{{ message }}</p>
+
+    </div>
+
+  </div>
+</div>

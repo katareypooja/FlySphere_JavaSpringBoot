@@ -1,0 +1,384 @@
+<!-- ✅ Reusable Booking Navbar -->
+<app-booking-navbar></app-booking-navbar>
+
+<div class="booking-wrapper" *ngIf="bookingData">
+
+  <!-- ✅ Removed duplicate step progress (handled in navbar header) -->
+
+  <div class="booking-layout">
+
+    <!-- ✅ Inline validation only (no stacked error box) -->
+
+    <!-- ================= LEFT: FARE PANEL ================= -->
+    <div class="fare-panel">
+      <div class="fare-card">
+
+        <!-- ✅ PREMIUM ROUND TRIP HEADER -->
+        <ng-container *ngIf="bookingData?.tripType === 'round'; else oneWayHeader">
+
+          <div class="flight-block">
+            <div class="flight-title">✈ Departure</div>
+            <div class="flight-main">
+              {{ bookingData?.departure?.flight?.airline }}
+              ({{ bookingData?.departure?.flight?.flightno }})
+            </div>
+            <div class="flight-sub">
+              {{ bookingData?.departure?.flight?.flighttype }} •
+              {{ bookingData?.departure?.fare?.name }}
+            </div>
+          </div>
+
+          <div class="flight-block">
+            <div class="flight-title">✈ Return</div>
+            <div class="flight-main">
+              {{ bookingData?.return?.flight?.airline }}
+              ({{ bookingData?.return?.flight?.flightno }})
+            </div>
+            <div class="flight-sub">
+              {{ bookingData?.return?.flight?.flighttype }} •
+              {{ bookingData?.return?.fare?.name }}
+            </div>
+          </div>
+
+        </ng-container>
+
+        <!-- ✅ ONE WAY DISPLAY (Premium Minimal Style - Fixed Binding) -->
+        <ng-template #oneWayHeader>
+          <div class="flight-block">
+            <div class="flight-title">✈ One Way</div>
+            <div class="flight-main">
+              {{ bookingData?.flight?.airline }}
+              ({{ bookingData?.flight?.flightno }})
+            </div>
+            <div class="flight-sub">
+              {{ bookingData?.flight?.flighttype }} •
+              {{ bookingData?.fare?.name }}
+            </div>
+          </div>
+        </ng-template>
+
+        <!-- ✅ PER PASSENGER BREAKDOWN (OPTION A) -->
+        <div class="price-breakdown">
+
+          <div *ngFor="let p of passengers; let i = index" class="passenger-summary">
+
+            <div class="passenger-heading">
+              Passenger {{ i + 1 }} ({{ p.type | titlecase }})
+            </div>
+
+            <div class="row">
+              <span>Departure Fare</span>
+              <span>
+                ₹ {{
+                  bookingData?.tripType === 'round'
+                  ? (p.type === 'adult'
+                      ? bookingData?.departure?.fare?.adultFare
+                      : bookingData?.departure?.fare?.childFare)
+                  : (p.type === 'adult'
+                      ? bookingData?.fare?.adultFare
+                      : bookingData?.fare?.childFare)
+                }}
+              </span>
+            </div>
+
+            <div class="row" *ngIf="bookingData?.tripType === 'round'">
+              <span>Return Fare</span>
+              <span>
+                ₹ {{
+                  p.type === 'adult'
+                  ? bookingData?.return?.fare?.adultFare
+                  : bookingData?.return?.fare?.childFare
+                }}
+              </span>
+            </div>
+
+            <div class="row">
+              <span>Add-ons</span>
+              <span>
+                ₹ {{
+                  getSeatPrice(p.seatPreference) +
+                  getMealPrice(p.mealPreference) +
+                  (p.baggage ? baggagePrice : 0)
+                }}
+              </span>
+            </div>
+
+            <div class="row subtotal">
+              <span>Subtotal</span>
+              <span>
+                ₹ {{ getPassengerSubtotal(p) | number:'1.0-0' }}
+              </span>
+            </div>
+
+            <hr>
+          </div>
+
+          <!-- ✅ FINAL TOTAL SECTION -->
+          <div class="row">
+            <span>Base Fare Total</span>
+            <span>₹ {{ baseTotal | number:'1.0-0' }}</span>
+          </div>
+
+          <div class="row">
+            <span>Add-ons Total</span>
+            <span>₹ {{ addonsTotal | number:'1.0-0' }}</span>
+          </div>
+
+          <div class="row">
+            <span>Taxes (12%)</span>
+            <span>₹ {{ taxAmount | number:'1.0-0' }}</span>
+          </div>
+
+          <div class="row">
+            <span>Convenience Fee</span>
+            <span>₹ {{ convenienceFee }}</span>
+          </div>
+
+          <hr>
+
+          <div class="row grand-total">
+            <span>Total Payable</span>
+            <span>₹ {{ grandTotal | number:'1.0-0' }}</span>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= RIGHT: PASSENGERS & ADDONS ================= -->
+    <div class="details-panel" [ngClass]="{'shake': shakeForm}">
+
+      <!-- ✅ Validation Error Banner -->
+      <div *ngIf="validationErrors.length > 0" class="error-banner">
+        <ul>
+          <li *ngFor="let err of validationErrors">
+            {{ err }}
+          </li>
+        </ul>
+      </div>
+
+      <h2>Passengers</h2>
+
+      <div *ngFor="let passenger of passengers; let i = index" class="passenger-card">
+
+        <div class="passenger-header">
+          <h3>
+            Passenger {{ i + 1 }}
+            <span class="badge" [ngClass]="passenger.type">
+              {{ passenger.type | titlecase }} (Age {{ passenger.age }})
+            </span>
+          </h3>
+          <button *ngIf="passengers.length > 1"
+                  class="remove-btn"
+                  (click)="removePassenger(i)">
+            ✕
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <div class="floating-field">
+            <input type="text"
+                   [(ngModel)]="passenger.firstName"
+                   [ngClass]="{'invalid-field': isPassengerFieldInvalid(passenger.firstName)}"
+                   required>
+            <label>First Name</label>
+            <div class="field-error"
+                 *ngIf="formSubmitted && !passenger.firstName">
+              First name is required
+            </div>
+          </div>
+
+          <div class="floating-field">
+            <input type="text"
+                   [(ngModel)]="passenger.lastName"
+                   [ngClass]="{'invalid-field': isPassengerFieldInvalid(passenger.lastName)}"
+                   required>
+            <label>Last Name</label>
+            <div class="field-error"
+                 *ngIf="formSubmitted && !passenger.lastName">
+              Last name is required
+            </div>
+          </div>
+
+          <div class="floating-field">
+            <input type="date"
+                   [(ngModel)]="passenger.dob"
+                   (change)="onDobChange(passenger)"
+                   [ngClass]="{'invalid-field': isDobInvalid(passenger)}"
+                   required>
+            <label>Date of Birth</label>
+            <div class="field-error"
+                 *ngIf="formSubmitted && isDobInvalid(passenger)">
+              Valid date of birth required
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ ADD-ONS PER PASSENGER -->
+        <div class="addons-section">
+
+          <div class="premium-options-section two-column-options">
+
+            <!-- ✅ Compact Segmented Seat Selector -->
+            <div class="premium-option-group">
+              <div class="section-label">🎟 Seat Preference</div>
+              <div class="segmented-control">
+                <button type="button"
+                        [class.active]="passenger.seatPreference === ''"
+                        (click)="passenger.seatPreference = ''">
+                  No Seat
+                </button>
+
+                <button type="button"
+                        [class.active]="passenger.seatPreference === 'middle'"
+                        (click)="passenger.seatPreference = 'middle'">
+                  Middle · ₹299
+                </button>
+
+                <button type="button"
+                        [class.active]="passenger.seatPreference === 'aisle'"
+                        (click)="passenger.seatPreference = 'aisle'">
+                  Aisle · ₹399
+                </button>
+
+                <button type="button"
+                        [class.active]="passenger.seatPreference === 'window'"
+                        (click)="passenger.seatPreference = 'window'">
+                  Window · ₹499
+                </button>
+              </div>
+            </div>
+
+            <!-- ✅ Compact Segmented Meal Selector -->
+            <div class="premium-option-group">
+              <div class="section-label">🍽 Meal Preference</div>
+              <div class="segmented-control">
+                <button type="button"
+                        [class.active]="passenger.mealPreference === ''"
+                        (click)="passenger.mealPreference = ''">
+                  No Meal
+                </button>
+
+                <button type="button"
+                        [class.active]="passenger.mealPreference === 'veg'"
+                        (click)="passenger.mealPreference = 'veg'">
+                  Veg · ₹199
+                </button>
+
+                <button type="button"
+                        [class.active]="passenger.mealPreference === 'jain'"
+                        (click)="passenger.mealPreference = 'jain'">
+                  Jain · ₹249
+                </button>
+
+                <button type="button"
+                        [class.active]="passenger.mealPreference === 'nonveg'"
+                        (click)="passenger.mealPreference = 'nonveg'">
+                  Non‑Veg · ₹299
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ✅ Luxury Extra Baggage Card -->
+          <div class="luxury-addon-card" [class.active]="passenger.baggage">
+            <div class="addon-content">
+              <div class="addon-header">
+<div class="addon-title">🧳 Extra Baggage – Up to 10 kg</div>
+                <label class="switch">
+                  <input type="checkbox" [(ngModel)]="passenger.baggage">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="addon-features">
+<span>+10 kg Checked Baggage</span>
+                <span>Priority Handling</span>
+                <span>Secure Tagging</span>
+              </div>
+
+              <div class="addon-price">
+                ₹ {{ baggagePrice }} <small>per passenger</small>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ✅ Add Passenger -->
+      <button class="add-btn"
+              (click)="addPassenger()"
+              [disabled]="passengers.length >= maxPassengers">
+        + Add Passenger
+      </button>
+
+      <!-- ✅ Luxury Travel Protection Card -->
+      <div class="luxury-addon-card insurance-card" [class.active]="travelInsurance">
+        <div class="addon-content">
+          <div class="addon-header">
+            <div class="addon-title">🛡 Premium Travel Protection</div>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="travelInsurance">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="addon-features">
+            <span>Medical Cover up to ₹3,00,000</span>
+            <span>Trip Cancellation Protection</span>
+            <span>Lost Baggage Coverage</span>
+            <span>24×7 Assistance Support</span>
+          </div>
+
+          <div class="addon-price">
+            ₹ {{ insurancePrice }} <small>per passenger</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ✅ Contact -->
+      <div class="passenger-card">
+        <h3>Contact Information</h3>
+        <div class="form-grid">
+          <div class="floating-field">
+            <input type="email"
+                   [(ngModel)]="contact.email"
+                   [ngClass]="{'invalid-field': isEmailInvalid()}"
+                   required>
+            <label>Email Address</label>
+            <div class="field-error"
+                 *ngIf="isEmailInvalid()">
+              Enter a valid email
+            </div>
+          </div>
+
+          <div class="floating-field">
+            <input type="tel"
+                   [(ngModel)]="contact.phone"
+                   [ngClass]="{'invalid-field': isPhoneInvalid()}"
+                   required>
+            <label>Phone Number</label>
+            <div class="field-error"
+                 *ngIf="isPhoneInvalid()">
+              Enter valid 10-digit phone
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="continue-btn"
+                (click)="confirmBooking()">
+          Proceed →
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

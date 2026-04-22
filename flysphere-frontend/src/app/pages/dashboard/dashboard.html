@@ -1,0 +1,19 @@
+<div class="dashboard-container">
+  <div class="card">
+    <h2>Welcome to FlySphere ✈️</h2>
+
+    <div *ngIf="user">
+      <p><strong>Name:</strong> {{ user.firstname }} {{ user.middlename }} {{ user.lastname }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Phone:</strong> {{ user.phone }}</p>
+      <p><strong>Role:</strong> {{ user.role }}</p>
+    </div>
+
+    <div *ngIf="role === 'ADMIN'" class="admin-panel">
+      <h3>🛡 Admin Panel</h3>
+      <p>You have administrative privileges.</p>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+</div>

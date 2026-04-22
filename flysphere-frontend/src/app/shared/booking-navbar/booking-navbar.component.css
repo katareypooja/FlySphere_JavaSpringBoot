@@ -1,0 +1,183 @@
+/* ✅ Reused styles from booking page */
+
+.booking-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.booking-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.plane {
+  font-size: 20px;
+}
+
+.logo-text {
+  background: linear-gradient(90deg, #1e63ff, #00b3ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.tagline {
+  font-size: 12px;
+  color: #6c7a89;
+}
+
+.booking-steps {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.booking-steps .step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.booking-steps .step.active {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.booking-steps .circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: #ffffff;
+  color: #6b7280;
+}
+
+.booking-steps .step.active .circle {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #ffffff;
+}
+
+.step-line {
+  width: 40px;
+  height: 1.5px;
+  background: #e5e7eb;
+}
+
+/* ✅ EXACT Search Page Customer Service Styling */
+
+.support-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.support-btn:hover {
+  background: #eef4ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* ✅ MATCH SEARCH PAGE NAVBAR RIGHT SECTION */
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.support {
+  position: relative;
+}
+
+.support-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  width: 220px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+  border: 1px solid #e6edf7;
+  padding: 10px 0;
+  animation: fadeIn 0.2s ease;
+  z-index: 1000;
+}
+
+.support-dropdown div {
+  padding: 10px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.support-dropdown div:hover {
+  background: #f5f8ff;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 13px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.user-email {
+  color: #6b7280;
+}
+
+.logout-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #2563eb;
+  background: white;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #2563eb;
+  color: white;
+}

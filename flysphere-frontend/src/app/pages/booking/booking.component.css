@@ -1,0 +1,903 @@
+/* ================= PREMIUM BOOKING HEADER ================= */
+
+.booking-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  animation: fadeHeader 0.5s ease-in-out;
+}
+
+.booking-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.plane {
+  animation: floatPlane 2.5s ease-in-out infinite;
+  font-size: 20px;
+}
+
+.logo-text {
+  background: linear-gradient(90deg, #1e63ff, #00b3ff);
+
+  /* ✅ Standard + WebKit compatibility */
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.tagline {
+  font-size: 12px;
+  color: #6c7a89;
+  letter-spacing: 0.5px;
+}
+
+.booking-steps {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+/* ✅ Clean minimal step */
+.booking-steps .step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.booking-steps .step.active {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.booking-steps .circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  background: #ffffff;
+  color: #6b7280;
+}
+
+.booking-steps .step.active .circle {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #ffffff;
+}
+
+.step-line {
+  width: 40px;
+  height: 1.5px;
+  background: #e5e7eb;
+}
+
+.support-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: #f1f5ff;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.support-btn:hover {
+  background: #e0ecff;
+}
+
+/* Header animations */
+@keyframes floatPlane {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes fadeHeader {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.booking-wrapper {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  min-height: 100vh; /* ✅ Prevent layout jump on navigation */
+  display: block;
+}
+
+/* ✅ Step Progress Header */
+.step-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.step-item .circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.step-item.active .circle {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.35);
+}
+
+.step-item span {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.step-item.active span {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.step-progress .line {
+  width: 90px;
+  height: 2px;
+  background: #e2e8f0;
+  position: relative;
+  top: -12px;
+}
+
+/* ✅ Step Indicator */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  font-weight: 600;
+  margin: 0 5px;
+}
+
+.step.active {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: #ffffff;
+}
+
+/* ✅ Main Layout */
+.booking-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 40px;
+  align-items: start; /* ✅ Stabilize grid alignment */
+}
+
+/* ✅ Fare Panel */
+.fare-panel {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.fare-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+.airline {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.price-breakdown .row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.grand-total {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+/* ✅ Details Panel */
+.details-panel {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* ✅ Validation Error Banner */
+.error-banner {
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.error-banner ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.details-panel h2 {
+  margin-bottom: 24px;
+}
+
+/* ✅ Passenger Card */
+.passenger-card {
+  margin-bottom: 28px;
+  padding: 24px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(37,99,235,0.12);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+}
+
+.passenger-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(37,99,235,0.10);
+}
+
+.passenger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.badge {
+  margin-left: 10px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.badge.adult {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.badge.child {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.remove-btn {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  color: #dc2626;
+}
+
+/* ✅ Forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 20px;
+  row-gap: 20px;
+  align-items: start;
+}
+
+/* Make DOB slightly compact */
+.floating-field input[type="date"] {
+  height: 46px;
+}
+
+/* Premium input field wrapper spacing */
+.form-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Make second row balanced */
+.form-grid > div:nth-child(3),
+.form-grid > div:nth-child(4) {
+  grid-column: span 1;
+}
+
+.form-grid input,
+.form-grid select {
+  height: 52px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 500;
+  background: #ffffff;
+  transition: all 0.25s ease;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+
+.form-grid input:hover,
+.form-grid select:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+}
+
+/* ✅ Add-ons Layout Fix */
+.addons-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ================= LUXURY ADD-ON CARDS ================= */
+
+.luxury-addon-card {
+  margin-top: 18px;
+  border-radius: 16px;
+  padding: 18px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.luxury-addon-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 35px rgba(37, 99, 235, 0.15);
+}
+
+.luxury-addon-card.active {
+  border: 1px solid #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.insurance-card {
+  margin-top: 30px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(124,58,237,0.08));
+}
+
+.addon-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addon-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.addon-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.addon-price {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1e3a8a;
+}
+
+.addon-price small {
+  font-weight: 500;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ✅ Toggle Switch */
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  border-radius: 999px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.switch input:checked + .slider {
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* ✅ Better spacing overall */
+.details-panel {
+  padding-bottom: 40px;
+}
+
+.addons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.addon-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.addon-item label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.addon-item select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.addon-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.addon-row .left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.addon-row .right {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.insurance-section {
+  margin-top: 20px;
+}
+
+/* ✅ Buttons */
+.add-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  margin: 28px 0;
+  transition: all 0.25s ease;
+}
+
+.add-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37,99,235,0.35);
+}
+
+.add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.continue-btn {
+  width: 240px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  background: #1e3a8a;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.continue-btn:hover {
+  background: #172554;
+  transform: translateY(-1px);
+}
+
+/* ✅ Responsive */
+@media (max-width: 992px) {
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fare-panel {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* ✅ Invalid Field Highlight */
+.invalid-field {
+  border: 2px solid #e53935 !important;
+  background-color: #fff5f5;
+  box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.2);
+}
+
+.field-error {
+  font-size: 12px;
+  color: #e53935;
+  margin-top: 4px;
+}
+
+/* ✅ Shake Animation */
+.shake {
+  animation: shakeX 0.35s ease-in-out;
+}
+
+@keyframes shakeX {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+/* ================= PREMIUM FARE PANEL ENHANCEMENT ================= */
+
+.flight-block {
+  background: #f8f9fc;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e4e7f2;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.flight-block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+
+.flight-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.flight-main {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.flight-sub {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.passenger-summary {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+.passenger-heading {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 12px;
+  color: #374151;
+}
+
+.price-breakdown .row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.subtotal {
+  font-weight: 700;
+  color: #111827;
+  margin-top: 6px;
+}
+
+.price-breakdown hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 16px 0;
+}
+
+.grand-total {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.grand-total span:last-child {
+  font-size: 20px;
+}
+
+/* ================= NEXT‑LEVEL PREMIUM POLISH ================= */
+
+/* Gradient accent border for fare card */
+.fare-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.fare-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb, #00b3ff);
+}
+
+/* Animated total highlight */
+.grand-total {
+  background: linear-gradient(90deg, rgba(37,99,235,0.08), rgba(0,179,255,0.08));
+  padding: 10px 12px;
+  border-radius: 10px;
+  animation: glowTotal 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes glowTotal {
+  from {
+    box-shadow: 0 0 0 rgba(37,99,235,0.15);
+  }
+  to {
+    box-shadow: 0 0 14px rgba(37,99,235,0.25);
+  }
+}
+
+/* Smooth price transition effect */
+.price-breakdown .row span:last-child {
+  transition: all 0.25s ease;
+}
+
+/* Slight hover effect on passenger summaries */
+.passenger-summary:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* Micro interaction for buttons */
+.continue-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.continue-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: rgba(255,255,255,0.2);
+  transform: skewX(-20deg);
+}
+
+.continue-btn:hover::after {
+  left: 130%;
+  transition: 0.6s ease;
+}
+
+/* ================= PREMIUM OPTION TILES ================= */
+
+.premium-options-section {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Seat & Meal side-by-side */
+.two-column-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.premium-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: #1f2937;
+  letter-spacing: 0.4px;
+}
+
+/* ================= SEGMENTED CONTROL STYLE ================= */
+
+.segmented-control {
+  display: inline-flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  padding: 3px;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.segmented-control button {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segmented-control button:hover {
+  background: #e2e8f0;
+}
+
+.segmented-control button.active {
+  background: rgba(37,99,235,0.9);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(37,99,235,0.18);
+}
+
+/* ================= FLOATING LABEL FIELDS ================= */
+
+.floating-field {
+  position: relative;
+}
+
+.floating-field input,
+.floating-field select {
+  width: 100%;
+}
+
+.floating-field label {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  font-size: 13px;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  padding: 0 6px;
+}
+
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label,
+.floating-field select:focus + label,
+.floating-field select:not([value=""]) + label {
+  top: -8px;
+  font-size: 11px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Subtle premium divider above passenger form */
+.passenger-card .form-grid {
+  margin-top: 10px;
+  padding-top: 18px;
+  border-top: 1px solid #f1f5f9;
+}

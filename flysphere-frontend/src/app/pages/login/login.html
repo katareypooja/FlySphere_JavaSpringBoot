@@ -1,0 +1,70 @@
+<div class="auth-wrapper">
+  <div class="auth-layout">
+
+    <!-- ✅ LEFT BRANDING SIDE -->
+    <div class="brand-side">
+      <h1 class="brand-title">✈ FlySphere</h1>
+      <p class="brand-slogan">Your Journey Begins Here</p>
+
+      <div class="promo-banner">
+        🔥 Flat 30% OFF on First Booking
+        <span>Use Code: FLY30</span>
+      </div>
+
+      <p class="welcome-line">
+        Welcome aboard! Unlock exclusive travel deals and explore the world with comfort and style.
+      </p>
+    </div>
+
+    <!-- ✅ RIGHT LOGIN CARD -->
+    <div class="card modern-auth-card">
+    <h2 class="auth-heading">Sign in</h2>
+
+    <form (ngSubmit)="onLogin()">
+
+      <label class="input-label">Email*</label>
+      <input
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        required
+      />
+
+      <label class="input-label">Password*</label>
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+      />
+
+      <div class="auth-row">
+        <label class="remember-box">
+          <input type="checkbox" />
+          Remember me
+        </label>
+
+        <a class="forgot-link" href="#">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="purple-btn">
+        Login
+      </button>
+
+    </form>
+
+    <p class="bottom-text">
+      Not registered yet?
+      <a routerLink="/register">Create an Account</a>
+    </p>
+
+    <div *ngIf="successMessage" class="success-banner">
+    {{ successMessage }}
+  </div>
+
+  <p class="error-msg">{{ message }}</p>
+
+    </div>
+
+  </div>
+</div>

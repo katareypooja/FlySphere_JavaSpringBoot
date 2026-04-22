@@ -1,0 +1,38 @@
+.legal-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+}
+
+.legal-container h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.legal-container h2 {
+  margin-top: 25px;
+  font-size: 18px;
+  color: #333;
+}
+
+.legal-container p {
+  font-size: 14px;
+  color: #555;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 30px;
+  text-decoration: none;
+  color: #6a5af9;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}

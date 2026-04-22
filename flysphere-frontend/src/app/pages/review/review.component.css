@@ -1,0 +1,195 @@
+.review-wrapper {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* ✅ Reuse Step Progress Styling */
+.step-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.step-progress .step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.step-progress .circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  font-weight: 600;
+  background: #ffffff;
+}
+
+.step-progress .step-item.active .circle {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.step-progress .step-item.completed .circle {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+}
+
+.step-progress .line {
+  width: 80px;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 14px;
+}
+
+.step-progress .completed-line {
+  background: #16a34a;
+}
+
+/* ✅ Layout */
+.review-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 40px;
+}
+
+/* ✅ Cards */
+.summary-card,
+.price-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+.summary-card h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.premium-passenger {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.8);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.premium-passenger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+}
+
+.passenger-top {
+  margin-bottom: 8px;
+}
+
+.passenger-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.passenger-meta {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.premium-addons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.addon-badge {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* ✅ Pricing */
+.price-card .row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.price-card .grand {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: linear-gradient(90deg, rgba(37,99,235,0.08), rgba(0,179,255,0.08));
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.confirm-btn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 999px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 24px rgba(37,99,235,0.35);
+}
+
+.confirm-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(37,99,235,0.45);
+}
+
+/* ✅ Premium Modify Button */
+.modify-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 999px;
+  background: transparent;
+  border: 2px solid #2563eb;
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.modify-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* ✅ Flight Date Styling */
+.flight-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* ✅ Responsive */
+@media (max-width: 992px) {
+  .review-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,73 @@
+<!-- ✅ Booking Navbar (Reverted to Previous Stable Version) -->
+<div class="booking-header">
+
+  <div class="booking-header-left">
+    <div class="premium-logo">
+      <span class="plane">✈</span>
+      <span class="logo-text">FlySphere</span>
+    </div>
+    <div class="tagline">Secure Booking</div>
+  </div>
+
+  <div class="booking-steps">
+    <div class="step"
+         [class.active]="currentStep === 1"
+         [class.completed]="currentStep > 1"
+         (click)="navigateTo(1)">
+      <span class="circle">1</span>
+      <span>Booking</span>
+    </div>
+
+    <div class="step-line"></div>
+
+    <div class="step"
+         [class.active]="currentStep === 2"
+         [class.completed]="currentStep > 2"
+         (click)="navigateTo(2)">
+      <span class="circle">2</span>
+      <span>Review</span>
+    </div>
+
+    <div class="step-line"></div>
+
+    <div class="step"
+         [class.active]="currentStep === 3"
+         (click)="navigateTo(3)">
+      <span class="circle">3</span>
+      <span>Confirmation</span>
+    </div>
+  </div>
+
+  <!-- ✅ Right Section -->
+  <div class="navbar-right">
+
+    <div class="support">
+      <button class="support-btn" (click)="supportOpen = !supportOpen">
+        📞 CUSTOMER SERVICE ▾
+      </button>
+
+      <div class="support-dropdown" *ngIf="supportOpen">
+        <div>📞 Call - +1 800 123 4567</div>
+        <div>📧 Email Support</div>
+        <div>💬 Live Chat</div>
+      </div>
+    </div>
+
+    <div *ngIf="user" class="user-section">
+      <div class="user-info">
+        <div class="user-name">
+          {{ user.firstname }} {{ user.lastname }}
+        </div>
+        <div class="user-email">
+          {{ user.email }}
+        </div>
+      </div>
+
+      <button class="logout-btn" (click)="logout()">
+        Logout
+      </button>
+    </div>
+
+  </div>
+
+</div>

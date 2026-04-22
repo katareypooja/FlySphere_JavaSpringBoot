@@ -1,0 +1,276 @@
+<!-- ✅ Reuse Premium Booking Navbar -->
+<app-booking-navbar></app-booking-navbar>
+ 
+<!-- ✅ SINGLE FRAME CONFIRMATION LAYOUT -->
+<div class="confirmation-wrapper" *ngIf="bookingData">
+ 
+  <div class="confirmation-frame">
+ 
+    <!-- ✅ HEADER -->
+    <div class="confirmation-header">
+      <div class="status-icon">✓</div>
+      <div class="header-text">
+        <h1>Booking Confirmed</h1>
+        <p>Your journey with FlySphere is successfully secured.</p>
+      </div>
+    </div>
+ 
+    <!-- ✅ SUMMARY ROW -->
+    <div class="confirmation-top-grid">
+ 
+      <div class="top-card">
+        <div class="label">Booking Reference</div>
+        <div class="value booking-ref">{{ bookingId }}</div>
+      </div>
+ 
+      <div class="top-card">
+        <div class="label">Route</div>
+        <div class="value route-compact">
+          {{ outboundFlight?.departureAirport }}
+          →
+          {{ outboundFlight?.arrivalAirport }}
+          <ng-container *ngIf="tripType === 'round' && returnFlight">
+            &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+            {{ returnFlight?.departureAirport }}
+            →
+            {{ returnFlight?.arrivalAirport }}
+          </ng-container>
+        </div>
+      </div>
+ 
+      <div class="top-card">
+        <div class="label">Total Paid</div>
+        <div class="value total-amount">
+          ₹ {{ totals?.grandTotal | number:'1.0-0' }}
+        </div>
+      </div>
+ 
+    </div>
+ 
+    <!-- ✅ DETAILS -->
+    <div class="confirmation-details">
+
+      <!-- ✅ Ticket-style flight cards like reference screenshot -->
+      <div class="flight-tickets">
+
+        <!-- Onward / Single leg ticket -->
+        <div class="ticket-card" *ngIf="outboundFlight">
+
+          <!-- Header row: route + date + meta + seat type -->
+          <div class="ticket-header-row">
+            <div class="ticket-route">
+              {{ outboundFlight?.departureAirport }}
+              →
+              {{ outboundFlight?.arrivalAirport }}
+            </div>
+            <div class="ticket-meta-right">
+              <span class="ticket-date">
+                {{ outboundFlight?.departureDate | date:'EEE, MMM d' }}
+              </span>
+              <span class="ticket-dot">•</span>
+              <span class="ticket-type">
+                {{ outboundFlight?.flighttype || 'Non Stop' }}
+              </span>
+              <span class="seat-pill" *ngIf="outboundFlight?.cabinclass">
+                {{ outboundFlight?.cabinclass }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Airline row -->
+          <div class="ticket-airline-row">
+            <div class="ticket-airline-left">
+              <span class="airline-name">{{ outboundFlight?.airlineName }}</span>
+              <span class="flight-no" *ngIf="outboundFlight?.flightNo">
+                {{ outboundFlight?.flightNo }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Package / fare details -->
+          <div class="ticket-package-row" *ngIf="outboundFlight?.farename || outboundFlight?.cabinclass">
+            <span class="package-label">Package:</span>
+            <span class="package-name">
+              {{ outboundFlight?.cabinclass || 'Economy' }}
+              <ng-container *ngIf="outboundFlight?.farename">
+                • {{ outboundFlight?.farename }}
+              </ng-container>
+            </span>
+          </div>
+
+          <!-- Timeline row -->
+          <div class="ticket-body-row">
+
+            <!-- Departure column -->
+            <div class="time-col">
+              <div class="time-main">
+                {{ outboundFlight?.departureTime }}
+              </div>
+              <div class="airport-sub">
+                {{ outboundFlight?.departureAirport }}
+              </div>
+            </div>
+
+            <!-- Vertical dotted line -->
+            <div class="timeline-col">
+              <div class="timeline-dot top"></div>
+              <div class="timeline-line"></div>
+              <div class="timeline-dot bottom"></div>
+            </div>
+
+            <!-- Arrival column -->
+            <div class="time-col">
+              <div class="time-main">
+                {{ outboundFlight?.arrivalTime }}
+              </div>
+              <div class="airport-sub">
+                {{ outboundFlight?.arrivalAirport }}
+              </div>
+            </div>
+
+          </div>
+
+
+        </div>
+
+        <!-- Return leg ticket (round trip only) -->
+        <div class="ticket-card" *ngIf="tripType === 'round' && returnFlight">
+
+          <!-- Header row -->
+          <div class="ticket-header-row">
+            <div class="ticket-route">
+              {{ outboundFlight?.departureAirport }}
+              →
+              {{ outboundFlight?.arrivalAirport }}
+            </div>
+            <div class="ticket-route">
+              {{ returnFlight?.departureAirport }}
+              →
+              {{ returnFlight?.arrivalAirport }}
+            </div>
+            <div class="ticket-meta-right">
+              <span class="ticket-date">
+                {{ returnFlight?.departureDate | date:'EEE, MMM d' }}
+              </span>
+              <span class="ticket-dot">•</span>
+              <span class="ticket-type">
+                {{ returnFlight?.flighttype || 'Non Stop' }}
+              </span>
+              <span class="seat-pill" *ngIf="returnFlight?.cabinclass">
+                {{ returnFlight?.cabinclass }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Airline row -->
+          <div class="ticket-airline-row">
+            <div class="ticket-airline-left">
+              <span class="airline-name">{{ returnFlight?.airlineName }}</span>
+              <span class="flight-no" *ngIf="returnFlight?.flightNo">
+                {{ returnFlight?.flightNo }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Package / fare details -->
+          <div class="ticket-package-row" *ngIf="returnFlight?.farename || returnFlight?.cabinclass">
+            <span class="package-label">Package:</span>
+            <span class="package-name">
+              {{ returnFlight?.cabinclass || 'Economy' }}
+              <ng-container *ngIf="returnFlight?.farename">
+                • {{ returnFlight?.farename }}
+              </ng-container>
+            </span>
+          </div>
+
+          <!-- Timeline row -->
+          <div class="ticket-body-row">
+
+            <!-- Departure column -->
+            <div class="time-col">
+              <div class="time-main">
+                {{ returnFlight?.departureTime }}
+              </div>
+              <div class="airport-sub">
+                {{ returnFlight?.departureAirport }}
+              </div>
+            </div>
+
+            <!-- Vertical dotted line -->
+            <div class="timeline-col">
+              <div class="timeline-dot top"></div>
+              <div class="timeline-line"></div>
+              <div class="timeline-dot bottom"></div>
+            </div>
+
+            <!-- Arrival column -->
+            <div class="time-col">
+              <div class="time-main">
+                {{ returnFlight?.arrivalTime }}
+              </div>
+              <div class="airport-sub">
+                {{ returnFlight?.arrivalAirport }}
+              </div>
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+ 
+      <div class="details-section">
+        <div class="section-title">Passengers</div>
+
+        <ng-container *ngIf="passengers?.length">
+          <div class="passenger-card" *ngFor="let p of passengers; let i = index">
+            <div class="flight-field">
+              <span class="flight-label">Passenger {{ i + 1 }}</span>
+              <span class="flight-value">
+                {{ p.firstName }} {{ p.lastName }}
+              </span>
+            </div>
+
+            <div class="flight-field">
+              <span class="flight-label">Type</span>
+              <span class="flight-value">{{ p.type | titlecase }}</span>
+            </div>
+
+            <div class="flight-field" *ngIf="p.gender">
+              <span class="flight-label">Gender</span>
+              <span class="flight-value">{{ p.gender | titlecase }}</span>
+            </div>
+
+            <div class="flight-field" *ngIf="p.age">
+              <span class="flight-label">Age</span>
+              <span class="flight-value">{{ p.age }}</span>
+            </div>
+
+            <div class="flight-field" *ngIf="p.nationality">
+              <span class="flight-label">Nationality</span>
+              <span class="flight-value">{{ p.nationality }}</span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+ 
+    </div>
+ 
+    <!-- ✅ ACTION (Download left/center, Return right) -->
+    <div class="confirmation-action">
+      <div class="confirmation-action-left">
+        <button class="download-btn" (click)="downloadTicket()">
+          Download E‑Ticket (PDF)
+        </button>
+      </div>
+      <div class="confirmation-action-right">
+        <button class="download-btn" (click)="goHome()">
+          Return to Search
+        </button>
+      </div>
+    </div>
+ 
+  </div>
+ 
+</div>
