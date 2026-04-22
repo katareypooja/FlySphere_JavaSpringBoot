@@ -168,7 +168,7 @@ Admin can:
 
 # 👩‍💻 Developed By
 
-**Pooja Katare**
+**Katarey Pooja**
 
 ---
 
