@@ -54,18 +54,34 @@
     </div>
 
     <div *ngIf="user" class="user-section">
-      <div class="user-info">
-        <div class="user-name">
-          {{ user.firstname }} {{ user.lastname }}
-        </div>
-        <div class="user-email">
-          {{ user.email }}
+
+      <!-- ✅ Match search page: show email inline -->
+      <div class="user-email-inline">
+        {{ user.email }}
+      </div>
+
+      <!-- ✅ Match search page: profile icon + dropdown -->
+      <div class="profile-container">
+        <button class="profile-btn" (click)="profileMenuOpen = !profileMenuOpen">
+          👤
+        </button>
+
+        <div class="profile-dropdown" *ngIf="profileMenuOpen">
+          <!-- Use buttons so we can call TS methods instead of routerLink -->
+          <button class="dropdown-item" (click)="goToSearch()">
+            Search
+          </button>
+
+          <button class="dropdown-item" (click)="goToMyBookings()">
+            My Bookings
+          </button>
+
+          <button class="dropdown-item logout-item" (click)="logout()">
+            Logout
+          </button>
         </div>
       </div>
 
-      <button class="logout-btn" (click)="logout()">
-        Logout
-      </button>
     </div>
 
   </div>

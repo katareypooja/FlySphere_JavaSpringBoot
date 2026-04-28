@@ -24,10 +24,8 @@
 }
 
 .navbar-inner {
-  max-width: 1200px;
   width: 100%;
-  margin: 0 auto;
-  padding: 0; /* align exactly with wrapper */
+  padding: 0 28px; /* ✅ push brand fully left and actions fully right */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -36,7 +34,55 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
+}
+
+/* ✅ Clean User Section Alignment */
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ✅ Email Styling (compact + clean) */
+.user-email-inline {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  margin-right: 4px;
+}
+
+/* ✅ Profile Avatar Circle */
+.profile-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-btn:hover {
+  background: #eaf2ff;
+  border-color: #3b82f6;
+}
+
+/* ✅ Dropdown Refinement */
+.profile-dropdown {
+  top: 46px;
+  min-width: 170px;
+  padding: 6px 0;
+}
+
+.dropdown-item {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 16px;
 }
 
 /* ================= MAIN CARD ================= */
@@ -215,6 +261,62 @@
 .logout-btn:hover {
   background: #3b82f6;
   color: #ffffff;
+}
+
+/* ================= PROFILE DROPDOWN ================= */
+
+.user-email-inline {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f3b64;
+}
+
+.profile-container {
+  position: relative;
+}
+
+.profile-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  border: 1px solid #e6edf7;
+  padding: 8px 0;
+  min-width: 160px;
+  z-index: 1200;
+  animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f3b64;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background: #f5f8ff;
+}
+
+.logout-item {
+  color: #dc2626;
 }
 
 .brand-title {
@@ -1257,6 +1359,24 @@
   backdrop-filter: blur(12px);
   padding: 20px;
   border-radius: 20px;
+}
+
+/* ✅ Bigger No Flights Message (Correct Target) */
+.no-flights-message {
+  font-size: 20px !important;   /* ✅ Reduced to fit in one line */
+  font-weight: 700;
+  line-height: 1.6;
+  color: #1f3b64;
+  margin: 14px 0;
+  white-space: nowrap;          /* ✅ Keep single line */
+}
+
+/* ✅ Add airplane icon before each empty-state line */
+.no-flights-message::before {
+  content: "✈  ";
+  color: #2563eb;
+  font-size: 22px;  /* ✅ Balanced with text */
+  margin-right: 8px;
 }
 
 /* ✅ Responsive Airline-style Mobile */

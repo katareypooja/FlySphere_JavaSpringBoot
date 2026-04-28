@@ -37,9 +37,9 @@ export class Navbar {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
 
-        this.adminEmail = payload.email;
-
-        this.adminName = payload.role === 'ADMIN' ? 'Admin User' : 'User';
+        // Always show Admin in admin panel
+        this.adminEmail = payload.email || 'admin@flysphere.com';
+        this.adminName = 'Admin';
 
       } catch (error) {
         console.error('Invalid token format');

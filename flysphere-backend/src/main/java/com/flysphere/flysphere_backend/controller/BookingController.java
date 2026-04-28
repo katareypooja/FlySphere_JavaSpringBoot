@@ -20,9 +20,20 @@ public class BookingController {
         return bookingService.createBooking(request);
     }
 
-    @GetMapping("/user/{userId}")
-    public List<Booking> getBookingsByUser(@PathVariable Long userId) {
-        return bookingService.getBookingsByUser(userId);
+    // ✅ Logged-in user - Get My Bookings with filtering + pagination
+    @GetMapping("/my")
+    public org.springframework.data.domain.Page<Booking> getMyBookings(
+            @RequestParam(required = false) String bookingId,
+            @RequestParam(required = false) String tripType,
+            @RequestParam(required = false) String status,
+            org.springframework.data.domain.Pageable pageable) {
+
+        return bookingService.getBookingsForLoggedInUser(
+                bookingId,
+                tripType,
+                status,
+                pageable
+        );
     }
 
     // ✅ Admin Dashboard - Get All Bookings
@@ -36,5 +47,11 @@ public class BookingController {
     public com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto getBookingDetails(
             @PathVariable String bookingId) {
         return bookingService.getBookingDetails(bookingId);
+    }
+
+    // ✅ Cancel Booking (Seat Restore Logic Included)
+    @PutMapping("/{bookingId}/cancel")
+    public void cancelBooking(@PathVariable String bookingId) {
+        bookingService.cancelBooking(bookingId);
     }
 }

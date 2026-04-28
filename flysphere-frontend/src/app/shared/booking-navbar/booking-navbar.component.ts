@@ -16,6 +16,7 @@ export class BookingNavbarComponent implements OnInit {
   currentStep: number = 1;
   user: any = null;
   supportOpen: boolean = false;
+  profileMenuOpen: boolean = false;
 
   constructor(
     private router: Router,
@@ -44,6 +45,17 @@ export class BookingNavbarComponent implements OnInit {
   logout() {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  // ✅ Profile dropdown navigation
+  goToSearch() {
+    this.profileMenuOpen = false;
+    this.router.navigate(['/search']);
+  }
+
+  goToMyBookings() {
+    this.profileMenuOpen = false;
+    this.router.navigate(['/my-bookings']);
   }
 
   navigateTo(step: number) {

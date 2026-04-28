@@ -13,69 +13,74 @@
       <!-- ✅ Round Trip -->
       <ng-container *ngIf="bookingData?.tripType === 'round'; else oneWayBlock">
 
-        <!-- Departure Block -->
+        <!-- Outbound -->
         <div class="flight-review-block premium-flight-block">
-          <div class="flight-header">
-            ✈ Departure
-            <div class="flight-date">
-              {{ bookingData?.departure?.flight?.departuredate || bookingData?.departure?.flight?.DepartureDate | date:'EEE, dd MMM yyyy' }}
-            </div>
+          
+          <div class="flight-header" style="font-weight:700;">
+            ✈ Outbound
           </div>
 
-          <div class="flight-main-row">
-            <div class="flight-time-hero">
-              {{ bookingData?.departure?.flight?.departTime }}
-            </div>
-
-            <div class="flight-route-hero">
-              {{ bookingData?.departure?.flight?.departure }}
- 
-              {{ bookingData?.departure?.flight?.arrival }}
-            </div>
-
-            <div class="flight-time-hero">
-              {{ bookingData?.departure?.flight?.arrivalTime }}
-            </div>
-          </div>
-
-          <div class="flight-meta-line">
+          <!-- ✅ Airline / Flight / Class / Aircraft -->
+          <div class="flight-meta-line" style="margin-top:6px; font-weight:600;">
             {{ bookingData?.departure?.flight?.airline }}
             • {{ bookingData?.departure?.flight?.flightno }}
             • {{ bookingData?.departure?.fare?.name }}
             • {{ bookingData?.departure?.flight?.flighttype }}
           </div>
+
+          <div style="font-size:13px; margin-top:8px;">
+            Departure:
+            {{ bookingData?.departure?.flight?.departCity }}
+            -
+            {{ (bookingData?.departureDate || bookingData?.departure?.flight?.departuredate) | date:'dd MMM yyyy' }}
+            -
+            {{ bookingData?.departure?.flight?.departTime }}
+          </div>
+
+          <div style="font-size:13px; margin-top:6px;">
+            Arrival:
+            {{ bookingData?.departure?.flight?.arriveCity }}
+            -
+            {{ (bookingData?.departureDate || bookingData?.departure?.flight?.arrivaldate) | date:'dd MMM yyyy' }}
+            -
+            {{ bookingData?.departure?.flight?.arriveTime || bookingData?.departure?.flight?.arrivalTime }}
+          </div>
+
         </div>
 
-        <!-- Return Block -->
+        <!-- Return -->
         <div class="flight-review-block premium-flight-block" style="margin-top:16px;">
-          <div class="flight-header">
+          
+          <div class="flight-header" style="font-weight:700;">
             ✈ Return
-            <div class="flight-date">
-              {{ bookingData?.return?.flight?.arrivaldate || bookingData?.return?.flight?.ArrivalDate | date:'EEE, dd MMM yyyy' }}
-            </div>
           </div>
 
-          <div class="flight-main-row">
-            <div class="flight-time-hero">
-              {{ bookingData?.return?.flight?.departTime }}
-            </div>
-
-            <div class="flight-route-hero">
-              {{ bookingData?.return?.flight?.departure }}
-              {{ bookingData?.return?.flight?.arrival }}
-            </div>
-
-            <div class="flight-time-hero">
-              {{ bookingData?.return?.flight?.arrivalTime }}
-            </div>
-          </div>
-
-          <div class="flight-meta-line">
+          <!-- ✅ Airline / Flight / Class / Aircraft -->
+          <div class="flight-meta-line" style="margin-top:6px; font-weight:600;">
             {{ bookingData?.return?.flight?.airline }}
             • {{ bookingData?.return?.flight?.flightno }}
             • {{ bookingData?.return?.fare?.name }}
             • {{ bookingData?.return?.flight?.flighttype }}
           </div>
+
+          <div style="font-size:13px; margin-top:8px;">
+            Departure:
+            {{ bookingData?.return?.flight?.departCity }}
+            -
+            {{ (bookingData?.returnDate || bookingData?.return?.flight?.departuredate) | date:'dd MMM yyyy' }}
+            -
+            {{ bookingData?.return?.flight?.departTime }}
+          </div>
+
+          <div style="font-size:13px; margin-top:6px;">
+            Arrival:
+            {{ bookingData?.return?.flight?.arriveCity }}
+            -
+            {{ (bookingData?.returnDate || bookingData?.return?.flight?.arrivaldate) | date:'dd MMM yyyy' }}
+            -
+            {{ bookingData?.return?.flight?.arriveTime || bookingData?.return?.flight?.arrivalTime }}
+          </div>
+
         </div>
 
       </ng-container>
@@ -83,48 +88,40 @@
       <!-- ✅ One Way -->
       <ng-template #oneWayBlock>
         <div class="flight-review-block premium-flight-block">
-          <div class="flight-header">
-            ✈ Departure
-            <div class="flight-date">
-              {{
-                (bookingData?.flight?.departuredate ||
-                  bookingData?.flight?.DepartureDate ||
-                  bookingData?.departuredate ||
-                  bookingData?.departureDate ||
-                  bookingData?.departDate) | date: 'EEE, dd MMM yyyy'
-              }}
-            </div>
+          
+          <!-- Header -->
+          <div class="flight-header" style="font-weight:700; font-size:15px;">
+            ✈ One Way
           </div>
 
-          <div class="flight-main-row">
-            <div class="flight-time-hero">
-              {{ bookingData?.flight?.departTime || bookingData?.departTime || '' }}
-            </div>            
+          <!-- Airline / Flight / Class / Type Row -->
+          <div class="flight-meta-line" style="margin-top:8px; font-weight:600;">
+            {{ bookingData?.flight?.airline }}
+            • {{ bookingData?.flight?.flightno }}
+            • {{ bookingData?.fare?.name }}
+            • {{ bookingData?.flight?.flighttype }}
           </div>
 
-          <div class="flight-meta-line">
-            {{
-              bookingData?.flight?.airline ||
-                bookingData?.airlinename ||
-                bookingData?.airline ||
-                ''
-            }}
-            •
-            {{
-              bookingData?.flight?.flightno ||
-                bookingData?.flightno ||
-                bookingData?.flightNumber ||
-                ''
-            }}
-            • {{ bookingData?.fare?.name || bookingData?.seatType || '' }}
-            •
-            {{
-              bookingData?.flight?.flighttype ||
-                bookingData?.flighttype ||
-                bookingData?.flightType ||
-                'Non-stop'
-            }}
+          <!-- Departure Row -->
+          <div style="font-size:13px; margin-top:8px;">
+            Departure:
+            {{ bookingData?.flight?.departCity }}
+            -
+            {{ (bookingData?.departureDate || bookingData?.flight?.departuredate) | date:'dd MMM yyyy' }}
+            -
+            {{ bookingData?.flight?.departTime }}
           </div>
+
+          <!-- Arrival Row -->
+          <div style="font-size:13px; margin-top:6px;">
+            Arrival:
+            {{ bookingData?.flight?.arriveCity }}
+            -
+            {{ (bookingData?.departureDate || bookingData?.flight?.arrivaldate) | date:'dd MMM yyyy' }}
+            -
+            {{ bookingData?.flight?.arriveTime }}
+          </div>
+
         </div>
       </ng-template>
 
@@ -143,28 +140,110 @@
         </div>
 
         <div class="addons premium-addons">
-          <span class="addon-badge">
-            🎟 Seat:
-            {{ p.seatPreference ? (p.seatPreference | titlecase) : 'No Seat Selected' }}
-          </span>
 
-          <span class="addon-badge">
-            🍽 Meal:
-            {{ p.mealPreference ? (p.mealPreference | titlecase) : 'No Meal Selected' }}
-          </span>
+          <!-- ✅ ONE WAY PREFERENCES -->
+          <ng-container *ngIf="bookingData?.tripType !== 'round'; else roundPrefs">
 
-          <span class="addon-badge">
-            🧳 Baggage:
-            {{ p.baggage ? '+10kg Added' : 'Standard Allowance' }}
-          </span>
+            <span class="addon-badge">
+              💺 Seat:
+              {{
+                p.seatPreference?.outbound
+                  ? (p.seatPreference.outbound | titlecase)
+                  : 'As per availability'
+              }}
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="p.mealPreference?.outbound">
+              🍽 Meal:
+              {{ p.mealPreference.outbound | titlecase }}
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="p.baggage?.outbound">
+              🧳 Baggage:
+              +10kg Added
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="totals?.addonsTotal && totals?.addonsTotal > 0">
+              🛡 Insurance: Added
+            </span>
+
+          </ng-container>
+
+          <!-- ✅ ROUND TRIP PREFERENCES -->
+          <ng-template #roundPrefs>
+
+            <span class="addon-badge">
+              💺 Seat (Outbound):
+              {{
+                p.seatPreference?.outbound
+                  ? (p.seatPreference.outbound | titlecase)
+                  : 'As per availability'
+              }}
+            </span>
+
+            <span class="addon-badge">
+              💺 Seat (Return):
+              {{
+                p.seatPreference?.return
+                  ? (p.seatPreference.return | titlecase)
+                  : 'As per availability'
+              }}
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="p.mealPreference?.outbound">
+              🍽 Meal (Outbound):
+              {{ p.mealPreference.outbound | titlecase }}
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="p.mealPreference?.return">
+              🍽 Meal (Return):
+              {{ p.mealPreference.return | titlecase }}
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="p.baggage?.outbound">
+              🧳 Baggage (Outbound):
+              +10kg Added
+            </span>
+
+            <span class="addon-badge"
+                  *ngIf="p.baggage?.return">
+              🧳 Baggage (Return):
+              +10kg Added
+            </span>
+
+            <span class="addon-badge">
+              🛡 Insurance:
+              {{ totals?.addonsTotal && totals?.addonsTotal > 0 && (totals?.addonsTotal >= 199) ? 'Added' : 'Not Added' }}
+            </span>
+
+          </ng-template>
+
         </div>
       </div>
 
       <hr>
 
       <h4>Contact</h4>
-      <p>{{ contact?.email }}</p>
-      <p>{{ contact?.phone }}</p>
+
+      <div class="contact-card" style="margin-top:10px; padding:14px; background:#f8fafc; border-radius:10px;">
+
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <span style="font-size:16px;">📧</span>
+          <span style="font-weight:500;">{{ contact?.email }}</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:16px;">📱</span>
+          <span style="font-weight:500;">{{ contact?.phone }}</span>
+        </div>
+
+      </div>
 
     </div>
 

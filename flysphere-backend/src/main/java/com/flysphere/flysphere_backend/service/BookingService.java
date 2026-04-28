@@ -21,11 +21,9 @@ public class BookingService {
     private final UserRepository userRepository;
     private final EntityManager entityManager;
 
-    /* ✅ FULL PRODUCTION BOOKING LOGIC */
     @Transactional
     public com.flysphere.flysphere_backend.dto.BookingResponseDto createBooking(BookingRequestDto request) {
 
-        // ✅ Extract logged-in user from JWT (SecurityContext)
         String email = org.springframework.security.core.context.SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -34,7 +32,6 @@ public class BookingService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
 
-        // ✅ Lock outbound flight row (prevents overbooking)
         Flight outboundFlight = entityManager.find(
                 Flight.class,
                 request.getOutboundFlightId().intValue(),
@@ -69,29 +66,45 @@ public class BookingService {
             throw new RuntimeException("No passengers provided");
         }
 
-        // ✅ Seat decrement logic
-        decrementSeats(outboundFlight, request.getCabinClass(), seatsToBook);
+        if ("round".equalsIgnoreCase(request.getTripType()) && returnFlight != null) {
 
-        if (returnFlight != null) {
-            decrementSeats(returnFlight, request.getCabinClass(), seatsToBook);
+            String outboundCabin = request.getOutboundCabinClass() != null
+                    ? request.getOutboundCabinClass()
+                    : request.getCabinClass();
+
+            String returnCabin = request.getReturnCabinClass() != null
+                    ? request.getReturnCabinClass()
+                    : request.getCabinClass();
+
+            decrementSeats(outboundFlight, outboundCabin, seatsToBook);
+            decrementSeats(returnFlight, returnCabin, seatsToBook);
+
+        } else {
+            decrementSeats(outboundFlight, request.getCabinClass(), seatsToBook);
         }
 
-        // ✅ Generate Booking ID
         String bookingId = generateBookingId();
 
         Booking booking = Booking.builder()
                 .bookingId(bookingId)
                 .user(user)
-                .flight(outboundFlight) // keep outbound for backward compatibility
+                .flight(outboundFlight)
                 .totalAmount(request.getTotalAmount())
                 .status("CONFIRMED")
+                // ✅ save booking contact + insurance from booking page (not user profile)
+                .contactPhone(request.getContactPhone())
+                .contactEmail(request.getContactEmail())
+                .insuranceSelected(request.getInsuranceSelected())
                 .build();
 
-        // ✅ Persist booking using same EntityManager (important for FK consistency)
-        entityManager.persist(booking);
-        entityManager.flush(); // Force insert immediately so DB generates ID
+        booking.setTripType(request.getTripType());
+        booking.setCabinClass(request.getCabinClass());
+        booking.setOutboundCabinClass(request.getOutboundCabinClass());
+        booking.setReturnCabinClass(request.getReturnCabinClass());
 
-        // ✅ Save outbound segment
+        entityManager.persist(booking);
+        entityManager.flush();
+
         BookingSegment outboundSegment = BookingSegment.builder()
                 .booking(booking)
                 .segmentNo(1)
@@ -100,7 +113,6 @@ public class BookingService {
 
         entityManager.persist(outboundSegment);
 
-        // ✅ Save return segment (if round trip)
         if (returnFlight != null) {
             BookingSegment returnSegment = BookingSegment.builder()
                     .booking(booking)
@@ -111,9 +123,16 @@ public class BookingService {
             entityManager.persist(returnSegment);
         }
 
-        // ✅ Save passengers
         if (request.getPassengers() != null) {
             for (BookingRequestDto.PassengerDto p : request.getPassengers()) {
+
+                // ✅ Auto Seat Assignment Logic
+                String outboundSeat = assignSeatNumber(request.getTripType(), p.getSeatPreference(), true);
+                String returnSeat = null;
+
+                if ("round".equalsIgnoreCase(request.getTripType())) {
+                    returnSeat = assignSeatNumber(request.getTripType(), p.getSeatPreference(), false);
+                }
 
                 Passenger passenger = Passenger.builder()
                         .booking(booking)
@@ -125,6 +144,8 @@ public class BookingService {
                         .seatPreference(p.getSeatPreference())
                         .mealPreference(p.getMealPreference())
                         .baggage(p.getBaggage())
+                        .outboundSeatNumber(outboundSeat)
+                        .returnSeatNumber(returnSeat)
                         .build();
 
                 entityManager.persist(passenger);
@@ -142,7 +163,6 @@ public class BookingService {
                 .build();
     }
 
-    /* ✅ Seat decrement with cabin class handling */
     private void decrementSeats(Flight flight, String cabinClass, int seatsToBook) {
 
         String cabin = cabinClass != null ? cabinClass.toLowerCase() : "economy";
@@ -175,7 +195,38 @@ public class BookingService {
         }
     }
 
-    /* ✅ Booking ID generator */
+    // ✅ Simple Auto Seat Assignment (Basic Version)
+    private String assignSeatNumber(String tripType, String seatPreference, boolean isOutbound) {
+
+        String[] windowSeats = {"A", "F"};
+        String[] aisleSeats = {"C", "D"};
+        String[] middleSeats = {"B", "E"};
+        String[] allSeats = {"A", "B", "C", "D", "E", "F"};
+
+        int row = 10 + (int)(Math.random() * 20); // Economy rows 10–29
+
+        String seatLetter;
+
+        if (seatPreference == null || seatPreference.isBlank()) {
+            // No preference → random seat
+            seatLetter = allSeats[(int)(Math.random() * allSeats.length)];
+        } else {
+            String pref = seatPreference.toLowerCase();
+
+            if (pref.contains("window")) {
+                seatLetter = windowSeats[(int)(Math.random() * windowSeats.length)];
+            } else if (pref.contains("aisle")) {
+                seatLetter = aisleSeats[(int)(Math.random() * aisleSeats.length)];
+            } else if (pref.contains("middle")) {
+                seatLetter = middleSeats[(int)(Math.random() * middleSeats.length)];
+            } else {
+                seatLetter = allSeats[(int)(Math.random() * allSeats.length)];
+            }
+        }
+
+        return row + seatLetter;
+    }
+
     private String generateBookingId() {
         return "FS-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
@@ -184,12 +235,119 @@ public class BookingService {
         return bookingRepository.findByUserId(userId);
     }
 
-    // ✅ Admin - Get All Bookings
+    // ✅ Get bookings for currently logged-in user with filtering + pagination
+    public org.springframework.data.domain.Page<Booking> getBookingsForLoggedInUser(
+            String bookingId,
+            String tripType,
+            String status,
+            org.springframework.data.domain.Pageable pageable) {
+
+        var authentication = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (authentication == null) {
+            throw new RuntimeException("Authentication is NULL");
+        }
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found for email: " + email));
+
+        org.springframework.data.jpa.domain.Specification<Booking> spec =
+                (root, query, cb) -> cb.equal(root.get("user").get("id"), user.getId());
+
+        if (bookingId != null && !bookingId.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("bookingId")), "%" + bookingId.toLowerCase() + "%"));
+        }
+
+        if (tripType != null && !tripType.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("tripType")), tripType.toLowerCase()));
+        }
+
+        if (status != null && !status.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("status")), status.toLowerCase()));
+        }
+
+        return bookingRepository.findAll(spec, pageable);
+    }
+
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
 
-    // ✅ Full Booking Details (for Confirmation Page)
+    @Transactional
+    public void cancelBooking(String bookingId) {
+
+        Booking booking = bookingRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if ("CANCELLED".equalsIgnoreCase(booking.getStatus())) {
+            throw new RuntimeException("Booking is already cancelled");
+        }
+
+        // Count passengers
+        List<Passenger> passengers = entityManager
+                .createQuery("SELECT p FROM Passenger p WHERE p.booking.id = :bookingId", Passenger.class)
+                .setParameter("bookingId", booking.getId())
+                .getResultList();
+
+        int seatsToRestore = passengers.size();
+
+        // Restore seats for all segments (handles round trip automatically)
+        List<BookingSegment> segments = entityManager
+                .createQuery("SELECT bs FROM BookingSegment bs WHERE bs.booking.id = :bookingId", BookingSegment.class)
+                .setParameter("bookingId", booking.getId())
+                .getResultList();
+
+        for (BookingSegment segment : segments) {
+
+            Flight flight = entityManager.find(
+                    Flight.class,
+                    segment.getFlight().getFlightId(),
+                    LockModeType.PESSIMISTIC_WRITE
+            );
+
+            String cabinToRestore;
+
+            if (segment.getSegmentNo() == 1) {
+                cabinToRestore = booking.getOutboundCabinClass() != null
+                        ? booking.getOutboundCabinClass()
+                        : booking.getCabinClass();
+            } else {
+                cabinToRestore = booking.getReturnCabinClass() != null
+                        ? booking.getReturnCabinClass()
+                        : booking.getCabinClass();
+            }
+
+            incrementSeats(flight, cabinToRestore, seatsToRestore);
+        }
+
+        booking.setStatus("CANCELLED");
+        bookingRepository.save(booking);
+    }
+
+    private void incrementSeats(Flight flight, String cabinClass, int seatsToRestore) {
+
+        String cabin = cabinClass != null ? cabinClass.toLowerCase() : "economy";
+
+        switch (cabin) {
+            case "business" -> flight.setTotalBusinessSeats(
+                    flight.getTotalBusinessSeats() + seatsToRestore
+            );
+            case "first", "first class" -> flight.setTotalFirstClassSeats(
+                    flight.getTotalFirstClassSeats() + seatsToRestore
+            );
+            default -> flight.setTotalEconomySeats(
+                    flight.getTotalEconomySeats() + seatsToRestore
+            );
+        }
+    }
+
     public com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto getBookingDetails(String bookingId) {
 
         Booking booking = bookingRepository.findByBookingId(bookingId)
@@ -209,20 +367,26 @@ public class BookingService {
                 .getResultList();
 
         List<com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.PassengerDto> passengerDtos =
-                passengers.stream().map(p ->
-                        com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.PassengerDto.builder()
+                passengers.stream()
+                        .map(p -> com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.PassengerDto.builder()
                                 .firstName(p.getFirstName())
                                 .lastName(p.getLastName())
                                 .age(p.getAge())
                                 .type(p.getType())
-                                .build()
-                ).toList();
+                                .seatPreference(p.getSeatPreference())
+                                .mealPreference(p.getMealPreference())
+                                .baggage(p.getBaggage() != null ? p.getBaggage().toString() : null)
+                                .outboundSeatNumber(p.getOutboundSeatNumber())
+                                .returnSeatNumber(p.getReturnSeatNumber())
+                                .build())
+                        .toList();
 
         List<com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.FlightSegmentDto> segmentDtos =
                 segments.stream().map(s ->
                         com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.FlightSegmentDto.builder()
                                 .airlineName(s.getFlight().getAirlineName())
                                 .flightNo(s.getFlight().getFlightNo())
+                                .flightType(s.getFlight().getFlightType())
                                 .departureAirport(s.getFlight().getDepartureAirport())
                                 .arrivalAirport(s.getFlight().getArrivalAirport())
                                 .departureDate(s.getFlight().getDepartureDate())
@@ -235,6 +399,14 @@ public class BookingService {
                 .bookingId(booking.getBookingId())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus())
+                .tripType(booking.getTripType())
+                .cabinClass(booking.getCabinClass())
+                .outboundCabinClass(booking.getOutboundCabinClass())
+                .returnCabinClass(booking.getReturnCabinClass())
+                // ✅ contact + insurance from Booking (values from booking page)
+                .contactPhone(booking.getContactPhone())
+                .contactEmail(booking.getContactEmail())
+                .insuranceSelected(booking.getInsuranceSelected())
                 .passengers(passengerDtos)
                 .segments(segmentDtos)
                 .build();

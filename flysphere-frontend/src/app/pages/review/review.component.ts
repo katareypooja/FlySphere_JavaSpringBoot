@@ -46,9 +46,39 @@ export class ReviewComponent implements OnInit {
     outboundFlightId: outboundFlightId,
     returnFlightId: isRound ? this.bookingData?.return?.flight?.id : null,
     tripType: this.bookingData?.tripType || (isRound ? 'round' : 'oneway'),
-    cabinClass: this.bookingData?.selectedCabinClass || this.bookingData?.cabinClass || 'Economy',
+
+    cabinClass: !isRound
+      ? (this.bookingData?.cabinClass || 'Economy')
+      : null,
+
+    outboundCabinClass: isRound
+      ? this.bookingData?.departure?.fare?.name
+      : null,
+
+    returnCabinClass: isRound
+      ? this.bookingData?.return?.fare?.name
+      : null,
+
     totalAmount: this.totals?.grandTotal,
-    passengers: this.passengers
+
+    // ✅ Send contact phone entered in booking page
+    contactPhone: this.contact?.phone,
+
+    // ✅ Flatten passenger preferences to match backend String fields
+    passengers: this.passengers.map(p => ({
+      ...p,
+      seatPreference: isRound
+        ? `${p.seatPreference?.outbound || ''}|${p.seatPreference?.return || ''}`
+        : (p.seatPreference?.outbound || ''),
+
+      mealPreference: isRound
+        ? `${p.mealPreference?.outbound || ''}|${p.mealPreference?.return || ''}`
+        : (p.mealPreference?.outbound || ''),
+
+      baggage: isRound
+        ? (p.baggage?.outbound || p.baggage?.return)
+        : p.baggage?.outbound
+    }))
   };
 
   console.log('🚀 Sending booking payload (Spring Boot):', payload);
