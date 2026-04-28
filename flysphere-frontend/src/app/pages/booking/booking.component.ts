@@ -12,7 +12,6 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
   styleUrls: ['./booking.component.css']
 })
 export class BookingComponent implements OnInit, AfterViewInit {
-
   bookingData: any = null;
 
   passengers: any[] = [];
@@ -21,8 +20,32 @@ export class BookingComponent implements OnInit, AfterViewInit {
   // ✅ Add-ons (Base prices)
   baggagePrice = 799;
   insurancePrice = 199;
+  insuranceComboPrice = 299;
 
-  travelInsurance = false;
+  // ✅ Common travel insurance toggles (All Passengers)
+  travelInsurance = {
+    outbound: false,
+    return: false
+  };
+
+  // ✅ Derived common insurance pricing (for bottom card only)
+  get commonInsurancePerPassenger(): number {
+    if (this.bookingData?.tripType === 'round') {
+      if (this.travelInsurance.outbound && this.travelInsurance.return) {
+        return this.insuranceComboPrice;
+      }
+      if (this.travelInsurance.outbound || this.travelInsurance.return) {
+        return this.insurancePrice;
+      }
+      return 0;
+    } else {
+      return this.travelInsurance.outbound ? this.insurancePrice : 0;
+    }
+  }
+
+  get commonInsuranceTotal(): number {
+    return this.commonInsurancePerPassenger * this.passengers.length;
+  }
 
   contact = {
     email: '',
@@ -66,10 +89,43 @@ export class BookingComponent implements OnInit, AfterViewInit {
       this.contact = state.contact;
     }
 
-    // ✅ Ensure passenger initialization happens after data is fully ready
+    // ✅ Auto-generate passengers based on search selection
     Promise.resolve().then(() => {
       if (this.passengers.length === 0) {
-        this.addPassenger();
+        const adults = Number(this.bookingData?.adults) || 0;
+        const children = Number(this.bookingData?.children) || 0;
+
+        // Add adult passengers
+        for (let i = 0; i < adults; i++) {
+          this.passengers.push({
+            title: '',
+            firstName: '',
+            lastName: '',
+            dob: '',
+            age: 0,
+            type: 'adult',
+            seatPreference: { outbound: '', return: '' },
+            baggage: { outbound: false, return: false },
+            mealPreference: { outbound: '', return: '' },
+            insurance: { outbound: false, return: false }
+          });
+        }
+
+        // Add child passengers
+        for (let i = 0; i < children; i++) {
+          this.passengers.push({
+            title: '',
+            firstName: '',
+            lastName: '',
+            dob: '',
+            age: 0,
+            type: 'child',
+            seatPreference: { outbound: '', return: '' },
+            baggage: { outbound: false, return: false },
+            mealPreference: { outbound: '', return: '' },
+            insurance: { outbound: false, return: false }
+          });
+        }
       }
     });
   }
@@ -86,9 +142,10 @@ export class BookingComponent implements OnInit, AfterViewInit {
       dob: '',
       age: 0,
       type: 'adult',
-      seatPreference: '',
-      baggage: false,
-      mealPreference: ''
+      seatPreference: { outbound: '', return: '' },
+      baggage: { outbound: false, return: false },
+      mealPreference: { outbound: '', return: '' },
+      insurance: { outbound: false, return: false }
     });
   }
 
@@ -134,12 +191,8 @@ export class BookingComponent implements OnInit, AfterViewInit {
     }
 
     // Validate passenger fields (aligned with validateBooking)
-    const passengersValid = this.passengers.every(p =>
-      p.firstName &&
-      p.lastName &&
-      p.dob &&
-      p.age &&
-      p.age > 0
+    const passengersValid = this.passengers.every(
+      p => p.firstName && p.lastName && p.dob && p.age && p.age > 0
     );
 
     if (!passengersValid) return false;
@@ -149,8 +202,10 @@ export class BookingComponent implements OnInit, AfterViewInit {
     const phoneRegex = /^[0-9]{10}$/;
 
     const contactValid =
-      !!this.contact.email && emailRegex.test(this.contact.email) &&
-      !!this.contact.phone && phoneRegex.test(this.contact.phone);
+      !!this.contact.email &&
+      emailRegex.test(this.contact.email) &&
+      !!this.contact.phone &&
+      phoneRegex.test(this.contact.phone);
 
     return contactValid;
   }
@@ -158,35 +213,30 @@ export class BookingComponent implements OnInit, AfterViewInit {
   /* ================= PRICING ================= */
 
   get baseTotal(): number {
+    let total = 0;
 
-    // ✅ ROUND TRIP
-    if (this.bookingData?.tripType === 'round') {
+    this.passengers.forEach(p => {
+      if (this.bookingData?.tripType === 'round') {
+        const depAdult =
+          Number(this.bookingData?.departure?.fare?.adultFare) || 0;
+        const depChild =
+          Number(this.bookingData?.departure?.fare?.childFare) || 0;
 
-      const depAdult = Number(this.bookingData?.departure?.fare?.adultFare) || 0;
-      const depChild = Number(this.bookingData?.departure?.fare?.childFare) || 0;
+        const retAdult = Number(this.bookingData?.return?.fare?.adultFare) || 0;
+        const retChild = Number(this.bookingData?.return?.fare?.childFare) || 0;
 
-      const retAdult = Number(this.bookingData?.return?.fare?.adultFare) || 0;
-      const retChild = Number(this.bookingData?.return?.fare?.childFare) || 0;
+        if (p.type === 'adult') {
+          total += depAdult + retAdult;
+        } else {
+          total += depChild + retChild;
+        }
+      } else {
+        const adultFare = Number(this.bookingData?.fare?.adultFare) || 0;
+        const childFare = Number(this.bookingData?.fare?.childFare) || 0;
 
-      const adults = Number(this.bookingData?.adults) || 0;
-      const children = Number(this.bookingData?.children) || 0;
-
-      const total =
-        (depAdult + retAdult) * adults +
-        (depChild + retChild) * children;
-
-      return Math.round(total);
-    }
-
-    // ✅ ONE WAY
-    const adultFare = Number(this.bookingData?.fare?.adultFare) || 0;
-    const childFare = Number(this.bookingData?.fare?.childFare) || 0;
-
-    const adults = Number(this.bookingData?.adults) || 0;
-    const children = Number(this.bookingData?.children) || 0;
-
-    const total = (adultFare * adults) +
-                  (childFare * children);
+        total += p.type === 'adult' ? adultFare : childFare;
+      }
+    });
 
     return Math.round(total);
   }
@@ -209,27 +259,38 @@ export class BookingComponent implements OnInit, AfterViewInit {
     let total = 0;
 
     this.passengers.forEach(p => {
-      total += this.getSeatPrice(p.seatPreference);
-      total += this.getMealPrice(p.mealPreference);
-      if (p.baggage) total += this.baggagePrice;
+      if (this.bookingData?.tripType === 'round') {
+        total += this.getSeatPrice(p.seatPreference?.outbound);
+        total += this.getSeatPrice(p.seatPreference?.return);
+
+        total += this.getMealPrice(p.mealPreference?.outbound);
+        total += this.getMealPrice(p.mealPreference?.return);
+
+        if (p.baggage?.outbound) total += this.baggagePrice;
+        if (p.baggage?.return) total += this.baggagePrice;
+      } else {
+        total += this.getSeatPrice(p.seatPreference?.outbound);
+        total += this.getMealPrice(p.mealPreference?.outbound);
+
+        if (p.baggage?.outbound) total += this.baggagePrice;
+      }
     });
 
-    if (this.travelInsurance) {
-      total += this.insurancePrice * this.passengers.length;
-    }
+    // ✅ Common insurance once for all passengers
+    total += this.commonInsuranceTotal;
 
     return Math.round(total);
   }
 
   /* ✅ Per Passenger Subtotal (Fix for string concatenation issue) */
   getPassengerSubtotal(p: any): number {
-
     let fareTotal = 0;
 
     if (this.bookingData?.tripType === 'round') {
-
-      const depAdult = Number(this.bookingData?.departure?.fare?.adultFare) || 0;
-      const depChild = Number(this.bookingData?.departure?.fare?.childFare) || 0;
+      const depAdult =
+        Number(this.bookingData?.departure?.fare?.adultFare) || 0;
+      const depChild =
+        Number(this.bookingData?.departure?.fare?.childFare) || 0;
 
       const retAdult = Number(this.bookingData?.return?.fare?.adultFare) || 0;
       const retChild = Number(this.bookingData?.return?.fare?.childFare) || 0;
@@ -239,19 +300,32 @@ export class BookingComponent implements OnInit, AfterViewInit {
       } else {
         fareTotal = depChild + retChild;
       }
-
     } else {
-
       const adultFare = Number(this.bookingData?.fare?.adultFare) || 0;
       const childFare = Number(this.bookingData?.fare?.childFare) || 0;
 
       fareTotal = p.type === 'adult' ? adultFare : childFare;
     }
 
-    const addons =
-      this.getSeatPrice(p.seatPreference) +
-      this.getMealPrice(p.mealPreference) +
-      (p.baggage ? this.baggagePrice : 0);
+    let addons = 0;
+
+    if (this.bookingData?.tripType === 'round') {
+      addons += this.getSeatPrice(p.seatPreference?.outbound);
+      addons += this.getSeatPrice(p.seatPreference?.return);
+
+      addons += this.getMealPrice(p.mealPreference?.outbound);
+      addons += this.getMealPrice(p.mealPreference?.return);
+
+      if (p.baggage?.outbound) addons += this.baggagePrice;
+      if (p.baggage?.return) addons += this.baggagePrice;
+    } else {
+      addons += this.getSeatPrice(p.seatPreference?.outbound);
+      addons += this.getMealPrice(p.mealPreference?.outbound);
+
+      if (p.baggage?.outbound) addons += this.baggagePrice;
+    }
+
+    // ✅ Insurance is common for all passengers (handled via commonInsuranceTotal)
 
     return Math.round(fareTotal + addons);
   }
@@ -264,17 +338,30 @@ export class BookingComponent implements OnInit, AfterViewInit {
     return this.passengers.length > 0 ? 249 : 0;
   }
 
+  // getInsurancePrice is no longer used now that insurance is common per booking,
+  // but kept here for reference / potential future per-passenger model.
+  getInsurancePrice(p: any): number {
+    if (this.bookingData?.tripType === 'round') {
+      if (p.insurance?.outbound && p.insurance?.return) {
+        return this.insuranceComboPrice;
+      }
+      if (p.insurance?.outbound || p.insurance?.return) {
+        return this.insurancePrice;
+      }
+      return 0;
+    } else {
+      return p.insurance?.outbound ? this.insurancePrice : 0;
+    }
+  }
+
   get grandTotal(): number {
     return Math.round(
-      this.baseTotal +
-      this.addonsTotal +
-      this.taxAmount +
-      this.convenienceFee
+      this.baseTotal + this.addonsTotal + this.taxAmount + this.convenienceFee
     );
   }
 
-  validateBooking(): boolean {
 
+  validateBooking(): boolean {
     // ✅ Track if errors already existed (to prevent repeated shake)
     const hadErrorsBefore = this.validationErrors.length > 0;
 
@@ -288,15 +375,29 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
     // ✅ Child cannot travel without at least one adult
     if (this.childCount > 0 && this.adultCount === 0) {
-      this.validationErrors.push('At least one adult is required to book a child ticket.');
+      this.validationErrors.push(
+        'At least one adult is required to book a child ticket.'
+      );
     }
 
     this.passengers.forEach((p, index) => {
       // ✅ Title is now optional
-      if (!p.firstName) this.validationErrors.push(`Passenger ${index + 1}: Please enter first name.`);
-      if (!p.lastName) this.validationErrors.push(`Passenger ${index + 1}: Please enter last name.`);
-      if (!p.dob) this.validationErrors.push(`Passenger ${index + 1}: Please select date of birth.`);
-      if (!p.age || p.age <= 0) this.validationErrors.push(`Passenger ${index + 1}: Please provide valid date of birth.`);
+      if (!p.firstName)
+        this.validationErrors.push(
+          `Passenger ${index + 1}: Please enter first name.`
+        );
+      if (!p.lastName)
+        this.validationErrors.push(
+          `Passenger ${index + 1}: Please enter last name.`
+        );
+      if (!p.dob)
+        this.validationErrors.push(
+          `Passenger ${index + 1}: Please select date of birth.`
+        );
+      if (!p.age || p.age <= 0)
+        this.validationErrors.push(
+          `Passenger ${index + 1}: Please provide valid date of birth.`
+        );
     });
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -310,7 +411,6 @@ export class BookingComponent implements OnInit, AfterViewInit {
     }
 
     if (this.validationErrors.length > 0) {
-
       // ✅ Shake only if this is a new error state
       if (!hadErrorsBefore) {
         this.shakeForm = true;
@@ -342,14 +442,18 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
   isEmailInvalid(): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return this.formSubmitted &&
-           (!this.contact.email || !emailRegex.test(this.contact.email));
+    return (
+      this.formSubmitted &&
+      (!this.contact.email || !emailRegex.test(this.contact.email))
+    );
   }
 
   isPhoneInvalid(): boolean {
     const phoneRegex = /^[0-9]{10}$/;
-    return this.formSubmitted &&
-           (!this.contact.phone || !phoneRegex.test(this.contact.phone));
+    return (
+      this.formSubmitted &&
+      (!this.contact.phone || !phoneRegex.test(this.contact.phone))
+    );
   }
 
   ngAfterViewInit(): void {
@@ -362,9 +466,8 @@ export class BookingComponent implements OnInit, AfterViewInit {
   }
 
   confirmBooking() {
-
-    // Safety: if passenger details are not entered as per selection, show popup
-    if (this.passengers.length !== this.totalFromSearch) {
+    // ✅ Ensure at least one passenger exists
+    if (this.passengers.length === 0) {
       alert('Please enter passenger details');
       return;
     }

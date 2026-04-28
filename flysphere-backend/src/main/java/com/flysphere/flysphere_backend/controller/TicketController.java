@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 public class TicketController {
 
     private final BookingRepository bookingRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @GetMapping("/{bookingId}/ticket")
     public ResponseEntity<byte[]> generateTicket(@PathVariable String bookingId) throws Exception {
@@ -29,7 +30,14 @@ public class TicketController {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         User user = booking.getUser();
-        Flight flight = booking.getFlight();
+
+        java.util.List<com.flysphere.flysphere_backend.model.BookingSegment> segments =
+                entityManager.createQuery(
+                        "SELECT bs FROM BookingSegment bs WHERE bs.booking.id = :id ORDER BY bs.segmentNo",
+                        com.flysphere.flysphere_backend.model.BookingSegment.class
+                )
+                .setParameter("id", booking.getId())
+                .getResultList();
 
         PDDocument document = new PDDocument();
         PDPage page = new PDPage(PDRectangle.A4);
@@ -51,14 +59,46 @@ public class TicketController {
         content.fill();
         content.setNonStrokingColor(Color.BLACK);
 
+        /* ================= WATERMARK ================= */
+        content.saveGraphicsState();
+        content.setNonStrokingColor(new Color(200, 220, 255)); // light blue watermark
+        content.setFont(PDType1Font.HELVETICA_BOLD, 90);
+
+        content.beginText();
+        content.setTextMatrix(
+                org.apache.pdfbox.util.Matrix.getRotateInstance(
+                        Math.toRadians(45),
+                        width / 4,
+                        height / 3
+                )
+        );
+        content.showText("FlySphere");
+        content.endText();
+
+        content.restoreGraphicsState();
+
         /* ================= HEADER BAND ================= */
         content.setNonStrokingColor(new Color(214, 228, 248));
         content.addRect(0, height - 115, width, 115);
         content.fill();
         content.setNonStrokingColor(Color.BLACK);
 
-        content.setFont(PDType1Font.HELVETICA_BOLD, 24);
-        write(content, "FlySphere E-Ticket", margin, y);
+        // Brand Header with Flight Icon + Blue Color (#2563eb)
+        content.setNonStrokingColor(new Color(37, 99, 235));
+        content.setFont(PDType1Font.HELVETICA_BOLD, 26);
+
+        // FlySphere text (Unicode removed to prevent PDFBox font error)
+        write(content, "FlySphere", margin, y);
+
+        content.setNonStrokingColor(new Color(100, 110, 120)); // Soft grey subtitle
+        content.setFont(PDType1Font.HELVETICA, 12);
+        write(content, "Secure Booking", margin + 2, y - 18);
+
+        // Reset color for rest
+        content.setNonStrokingColor(Color.BLACK);
+
+        content.setFont(PDType1Font.HELVETICA_BOLD, 16);
+        write(content, "E-Ticket", width / 2 - 40, y - 2);
 
         content.setFont(PDType1Font.HELVETICA_BOLD, 12);
         write(content, "Booking Ref", width - 170, y + 5);
@@ -66,104 +106,252 @@ public class TicketController {
         write(content, booking.getBookingId(), width - 170, y - 15);
 
         y -= 50;
-        drawSoftLine(content, margin, y, width - margin);
         y -= 35;
 
         /* ================= BOOKING INFORMATION ================= */
+        content.setNonStrokingColor(new Color(37, 99, 235));
         content.setFont(PDType1Font.HELVETICA_BOLD, 17);
         write(content, "Booking Information", margin, y);
-        y -= 28;
+        content.setNonStrokingColor(Color.BLACK);
+        y -= 12;
+        drawSoftLine(content, margin, y, width - margin);   // ✅ line below Booking Information
+        y -= 25;
 
-        float col1 = margin;
-        float col2 = margin + usableWidth * 0.25f;
-        float col3 = margin + usableWidth * 0.50f;
-        float col4 = margin + usableWidth * 0.75f;
+        // ✅ Fully balanced layout grid (clean proportional spacing across ticket)
+        float col1 = margin;                          // 0%
+        float col2 = margin + usableWidth * 0.22f;    // 22%
+        float col3 = margin + usableWidth * 0.45f;    // 45%
+        float col4 = margin + usableWidth * 0.68f;    // 68%
+        float col5 = margin + usableWidth * 0.88f;    // 88% (Seat No / right aligned content)
 
         content.setFont(PDType1Font.HELVETICA_BOLD, 11);
         write(content, "Booking ID", col1, y);
-        write(content, "Passenger", col2, y);
+        write(content, "Account Owner", col2, y);
         write(content, "Email", col3, y);
         write(content, "Status", col4, y);
 
-        y -= 12;
-        drawLine(content, margin, y, width - margin);
-        y -= 18;
+        y -= 20;
 
         content.setFont(PDType1Font.HELVETICA, 11);
-        write(content, trim(booking.getBookingId(), 18), col1, y);
-        write(content, trim(user.getFirstName() + " " + user.getLastName(), 18), col2, y);
-        write(content, trim(user.getEmail(), 22), col3, y);
-        write(content, trim(booking.getStatus(), 12), col4, y);
+        write(content, trim(booking.getBookingId(), 16), col1, y);
+        write(content, trim(user.getFirstName() + " " + user.getLastName(), 20), col2, y);
+        write(content, trim(user.getEmail(), 24), col3, y);
+        write(content, trim(booking.getStatus(), 14), col4, y);
 
         y -= 40;
 
         /* ================= FLIGHT DETAILS ================= */
+        content.setNonStrokingColor(new Color(37, 99, 235));
         content.setFont(PDType1Font.HELVETICA_BOLD, 17);
         write(content, "Flight Details", margin, y);
-        y -= 18;
+        content.setNonStrokingColor(Color.BLACK);
+        y -= 12;
+        drawSoftLine(content, margin, y, width - margin);
+        y -= 25;
+
+        // ✅ Flight rows handled dynamically below
+
+        double combinedTotal = booking.getTotalAmount();
+
+        for (int i = 0; i < segments.size(); i++) {
+
+            com.flysphere.flysphere_backend.model.BookingSegment segment = segments.get(i);
+            Flight flight = segment.getFlight();
+
+            if (segments.size() > 1) {
+                content.setFont(PDType1Font.HELVETICA_BOLD, 13);
+                write(content, (i == 0 ? "Outbound Flight" : "Return Flight"), col1, y);
+                y -= 15;
+                drawSoftLine(content, col1, y, width - margin);
+                y -= 18;
+            }
+
+            /* ✅ ROW 1: From | Airline | Aircraft | Seat Type */
+            content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+            write(content, "From", col1, y);
+            write(content, "Airline", col2, y);
+            write(content, "Aircraft", col3, y);
+            write(content, "Seat Type", col4, y);
+            write(content, "Seat No", col5, y);
+
+            y -= 16;
+            content.setFont(PDType1Font.HELVETICA, 11);
+
+            String seatType;
+
+            if ("round".equalsIgnoreCase(booking.getTripType())) {
+                seatType = (i == 0)
+                        ? booking.getOutboundCabinClass()
+                        : booking.getReturnCabinClass();
+            } else {
+                seatType = booking.getCabinClass();
+            }
+
+            write(content, trim(flight.getDepartureAirport(), 14), col1, y);
+            write(content, trim(flight.getAirlineName(), 20), col2, y);
+            write(content,
+                    trim(flight.getFlightType() != null ? flight.getFlightType() : "", 20),
+                    col3, y);
+            write(content,
+                    trim(seatType != null ? seatType : "", 16),
+                    col4, y);
+
+            // ✅ Seat column for both one-way and round trip
+            java.util.List<com.flysphere.flysphere_backend.model.Passenger> seatPassengers =
+                    entityManager.createQuery(
+                            "SELECT p FROM Passenger p WHERE p.booking.id = :id",
+                            com.flysphere.flysphere_backend.model.Passenger.class
+                    )
+                    .setParameter("id", booking.getId())
+                    .getResultList();
+
+            if (!seatPassengers.isEmpty()) {
+                String seatNumber = (segments.size() == 1)
+                        ? seatPassengers.get(0).getOutboundSeatNumber()
+                        : (i == 0
+                            ? seatPassengers.get(0).getOutboundSeatNumber()
+                            : seatPassengers.get(0).getReturnSeatNumber());
+
+                write(content, trim(seatNumber, 10), col5, y);
+            }
+
+            y -= 22;
+
+            /* ✅ ROW 2: To | Flight No | Departure | Arrival */
+            content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+            write(content, "To", col1, y);
+            write(content, "Flight No", col2, y);
+            write(content, "Departure", col3, y);
+            write(content, "Arrival", col4, y);
+
+            y -= 16;
+            content.setFont(PDType1Font.HELVETICA, 11);
+
+            write(content, trim(flight.getArrivalAirport(), 14), col1, y);
+            write(content, trim(flight.getFlightNo(), 14), col2, y);
+            write(content,
+                    trim(flight.getDepartureDate().format(formatter) + " " + flight.getDepartureTime(), 24),
+                    col3, y);
+            write(content,
+                    trim(flight.getArrivalDate().format(formatter) + " " + flight.getArrivalTime(), 24),
+                    col4, y);
+
+            y -= 18;
+
+            // ✅ Removed separate seat block (now handled in 5th column above)
+
+            y -= 28;
+
+            // spacing between stacked segments
+            if (segments.size() > 1 && i < segments.size() - 1) {
+                y -= 10;
+            }
+        }
+
+        /* ================= PASSENGER DETAILS ================= */
+        y -= 10;
+        content.setNonStrokingColor(new Color(37, 99, 235));
+        content.setFont(PDType1Font.HELVETICA_BOLD, 17);
+        write(content, "Passenger Details", margin, y);
+        content.setNonStrokingColor(Color.BLACK);
+        y -= 12;
+        drawSoftLine(content, margin, y, width - margin);
+        y -= 20;
+
+        java.util.List<com.flysphere.flysphere_backend.model.Passenger> passengerList =
+                entityManager.createQuery(
+                        "SELECT p FROM Passenger p WHERE p.booking.id = :id",
+                        com.flysphere.flysphere_backend.model.Passenger.class
+                )
+                .setParameter("id", booking.getId())
+                .getResultList();
 
         content.setFont(PDType1Font.HELVETICA_BOLD, 11);
-        write(content, "Route", margin, y);
-        y -= 12;
-
-        drawSoftLine(content, margin, y, width - margin);
-        y -= 22;
-
-        // Row 1 headers
-        write(content, "From", col1, y);
-        write(content, "Airline", col2, y);
-        write(content, "Departure Date", col3, y);
-        write(content, "Arrival Date", col4, y);
+        write(content, "Name", col1, y);
+        write(content, "Age", col2, y);
+        write(content, "Type", col3, y);
+        write(content, "Contact No", col4, y);
 
         y -= 16;
         content.setFont(PDType1Font.HELVETICA, 11);
 
-        write(content, trim(flight.getDepartureAirport(), 12), col1, y);
-        write(content, trim(flight.getAirlineName(), 15), col2, y);
-        write(content,
-                trim(flight.getDepartureDate().format(formatter) + " " + flight.getDepartureTime(), 20),
-                col3, y);
-        write(content,
-                trim(flight.getArrivalDate().format(formatter) + " " + flight.getArrivalTime(), 20),
-                col4, y);
+        for (com.flysphere.flysphere_backend.model.Passenger p : passengerList) {
+            write(content, trim(p.getFirstName() + " " + p.getLastName(), 20), col1, y);
+            write(content, String.valueOf(p.getAge()), col2, y);
+            write(content, p.getType(), col3, y);
+
+            // ✅ Show booking contact number instead of seat in passenger section
+            write(content, trim(booking.getContactPhone(), 18), col4, y);
+            y -= 16;
+        }
 
         y -= 25;
-        drawLine(content, margin, y, width - margin);
-        y -= 22;
-
-        // Row 2 headers
-        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
-        write(content, "To", col1, y);
-        write(content, "Flight Number", col2, y);
-        write(content, "Departure Terminal", col3, y);
-        write(content, "Arrival Terminal", col4, y);
-
-        y -= 16;
-        content.setFont(PDType1Font.HELVETICA, 11);
-
-        write(content, trim(flight.getArrivalAirport(), 12), col1, y);
-        write(content, trim(flight.getFlightNo(), 12), col2, y);
-        write(content, "N/A", col3, y);
-        write(content, "N/A", col4, y);
-
-        y -= 45;
 
         /* ================= FARE BREAKDOWN ================= */
+        content.setNonStrokingColor(new Color(37, 99, 235));
         content.setFont(PDType1Font.HELVETICA_BOLD, 17);
         write(content, "Fare Breakdown", margin, y);
-        y -= 22;
+        content.setNonStrokingColor(Color.BLACK);
+        y -= 12;
+        drawSoftLine(content, margin, y, width - margin);  // ✅ separator below title
+        y -= 25;
 
+        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+        write(content, "Base Fare", col1, y);
+        write(content, "Taxes & Charges", col2, y);
+        write(content, "Total Paid", col3, y);
+
+        y -= 16;
         content.setFont(PDType1Font.HELVETICA, 11);
-        write(content, "Base Fare: Rs " + booking.getTotalAmount(), margin, y);
-        y -= 16;
-        write(content, "Taxes & Charges: Included", margin, y);
-        y -= 16;
-        write(content, "Total Paid: Rs " + booking.getTotalAmount(), margin, y);
+        double totalPaid = combinedTotal;
+
+        // ✅ Calculate dynamic base fare from flights + passengers
+        double baseFare = 0.0;
+
+        // Count passengers
+        int passengerCount = passengerList.size();
+
+        for (int i = 0; i < segments.size(); i++) {
+            Flight flight = segments.get(i).getFlight();
+
+            double farePerAdult = 0.0;
+
+            // Determine fare based on cabin class
+            String cabin;
+            if ("round".equalsIgnoreCase(booking.getTripType())) {
+                cabin = (i == 0)
+                        ? booking.getOutboundCabinClass()
+                        : booking.getReturnCabinClass();
+            } else {
+                cabin = booking.getCabinClass();
+            }
+
+            if (cabin != null) {
+                if (cabin.toLowerCase().contains("economy")) {
+                    farePerAdult = flight.getEconomyAdultFare();
+                } else if (cabin.toLowerCase().contains("business")) {
+                    farePerAdult = flight.getBusinessAdultFare();
+                } else if (cabin.toLowerCase().contains("first")) {
+                    farePerAdult = flight.getFirstAdultFare();
+                }
+            }
+
+            if (farePerAdult != 0.0) {
+                baseFare += farePerAdult * passengerCount;
+            }
+        }
+
+        double taxesAndCharges = totalPaid - baseFare;
+
+        write(content, "Rs " + String.format("%.2f", baseFare), col1, y);
+        write(content, "Rs " + String.format("%.2f", taxesAndCharges), col2, y);
+        write(content, "Rs " + String.format("%.2f", totalPaid), col3, y);
 
         /* ================= CENTER FOOTER ================= */
         content.setFont(PDType1Font.HELVETICA_OBLIQUE, 11);
         String footer = "Thank you for choosing FlySphere. Have a pleasant journey!";
         write(content, footer, (width - 300) / 2, 75);
+
 
         content.close();
 

@@ -28,4 +28,29 @@ public class Booking extends BaseEntity {
 
     @Column(name = "status", length = 20)
     private String status;
+
+    // ✅ Trip & Cabin Class Support
+    @Column(name = "trip_type")
+    private String tripType;
+
+    @Column(name = "cabin_class")
+    private String cabinClass;
+
+    @Column(name = "outbound_cabin_class")
+    private String outboundCabinClass;
+
+    @Column(name = "return_cabin_class")
+    private String returnCabinClass;
+
+    // ✅ Contact phone entered during booking (not account phone)
+    @Column(name = "contact_phone")
+    private String contactPhone;
+
+    // ✅ Contact email entered during booking (not user account email)
+    @Column(name = "contact_email")
+    private String contactEmail;
+
+    // ✅ Whether insurance was selected for this booking
+    @Column(name = "insurance_selected")
+    private Boolean insuranceSelected;
 }

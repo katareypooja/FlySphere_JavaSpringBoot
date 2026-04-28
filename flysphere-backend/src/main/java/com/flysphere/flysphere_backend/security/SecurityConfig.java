@@ -29,9 +29,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/bookings/**").permitAll()
-                        .requestMatchers("/api/tickets/**").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/bookings/my").authenticated()
+                        .requestMatchers("/api/bookings/*").authenticated()
+                        // Only admin list endpoint restricted
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings").hasAuthority("ADMIN")
+                        .requestMatchers("/api/tickets/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

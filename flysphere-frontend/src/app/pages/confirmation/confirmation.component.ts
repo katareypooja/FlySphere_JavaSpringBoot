@@ -1,13 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navbar.component';
 
 @Component({
   selector: 'app-confirmation',
   standalone: true,
-  imports: [CommonModule, BookingNavbarComponent],
+  imports: [CommonModule, BookingNavbarComponent, HttpClientModule],
   templateUrl: './confirmation.component.html',
   styleUrls: ['./confirmation.component.css']
 })
@@ -65,11 +65,13 @@ export class ConfirmationComponent implements OnInit {
         if (response.segments && response.segments.length > 0) {
           this.outboundFlight = response.segments[0];
           this.returnFlight = response.segments.length > 1 ? response.segments[1] : null;
-          this.tripType = response.segments.length > 1 ? 'round' : 'oneway';
+
+          // ✅ Use backend tripType instead of deriving from segments
+          this.tripType = response.tripType;
         } else {
           this.outboundFlight = undefined;
           this.returnFlight = null;
-          this.tripType = undefined;
+          this.tripType = response.tripType;
         }
 
         console.log('✅ bookingData set in component:', this.bookingData);

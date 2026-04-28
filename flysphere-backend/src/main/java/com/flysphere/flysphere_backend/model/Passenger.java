@@ -39,4 +39,11 @@ public class Passenger extends BaseEntity {
 
     @Column(name = "baggage")
     private Boolean baggage;
+
+    // ✅ Auto-assigned seat numbers
+    @Column(name = "outbound_seat_number")
+    private String outboundSeatNumber;
+
+    @Column(name = "return_seat_number")
+    private String returnSeatNumber;
 }

@@ -664,10 +664,10 @@
 }
 
 .flight-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 4px;
+  font-weight: 900;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
 }
@@ -900,4 +900,32 @@
   margin-top: 10px;
   padding-top: 18px;
   border-top: 1px solid #f1f5f9;
+}
+
+/* ================= JOURNEY DIVIDED SECTION STYLE ================= */
+
+.journey-preference-block {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 22px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.journey-preference-block h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #1f2937;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ✅ Small orangish-red seat note */
+.seat-note {
+  font-size: 11px;
+  color: #e85d04;
+  margin-top: 6px;
+  font-weight: 500;
 }

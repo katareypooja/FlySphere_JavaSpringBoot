@@ -181,3 +181,59 @@
   background: #2563eb;
   color: white;
 }
+
+/* ================= PROFILE DROPDOWN (MATCH SEARCH PAGE) ================= */
+
+.user-email-inline {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f3b64;
+}
+
+.profile-container {
+  position: relative;
+}
+
+.profile-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  border: 1px solid #e6edf7;
+  padding: 8px 0;
+  min-width: 160px;
+  z-index: 1200;
+  animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f3b64;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background: #f5f8ff;
+}
+
+.logout-item {
+  color: #dc2626;
+}

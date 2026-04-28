@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { AIRPORTS } from '../../shared/airports';
 import { AuthService } from '../../services/auth';
@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth';
 @Component({
   selector: 'app-flight-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, RouterModule],
   templateUrl: './flight-search.component.html',
   styleUrls: ['./flight-search.component.css']
 })
@@ -56,6 +56,13 @@ export class FlightSearchComponent implements OnInit {
   supportOpen = false;
   toggleSupport() {
     this.supportOpen = !this.supportOpen;
+  }
+
+  /* ================= PROFILE DROPDOWN ================= */
+  profileOpen = false;
+
+  toggleProfileMenu() {
+    this.profileOpen = !this.profileOpen;
   }
 
   /* ================= TRIP ================= */
@@ -659,19 +666,22 @@ export class FlightSearchComponent implements OnInit {
         this.selectedDepartureFare &&
         this.selectedReturnFare) {
 
-      const bookingData = {
-        tripType: 'round',
-        departure: {
-          flight: this.selectedDeparture,
-          fare: this.selectedDepartureFare
-        },
-        return: {
-          flight: this.selectedReturn,
-          fare: this.selectedReturnFare
-        },
-        adults: this.adults,
-        children: this.children
-      };
+    const bookingData = {
+      tripType: 'round',
+      departure: {
+        flight: this.selectedDeparture,
+        fare: this.selectedDepartureFare
+      },
+      return: {
+        flight: this.selectedReturn,
+        fare: this.selectedReturnFare
+      },
+      departureDate: this.departureDate,
+      returnDate: this.returnDate,
+      cabinClass: this.selectedDepartureFare?.name,
+      adults: this.adults,
+      children: this.children
+    };
 
       sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
 
@@ -688,8 +698,11 @@ export class FlightSearchComponent implements OnInit {
 
     const bookingData = {
       tripType: 'oneway',
-      flight: this.selectedFlight,   // ✅ wrapped inside flight (consistent with round-trip)
+      flight: this.selectedFlight,
       fare: fareToBook,
+      departureDate: this.departureDate,
+      returnDate: null,
+      cabinClass: fareToBook?.name,
       adults: this.adults,
       children: this.children
     };

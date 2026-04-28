@@ -15,6 +15,17 @@ public class BookingDetailsResponseDto {
     private Double totalAmount;
     private String status;
 
+    // ✅ Trip & Cabin Class Support
+    private String tripType;
+    private String cabinClass;
+    private String outboundCabinClass;
+    private String returnCabinClass;
+
+    // ✅ Contact & insurance details for confirmation page
+    private String contactPhone;
+    private String contactEmail;
+    private Boolean insuranceSelected;
+
     private List<PassengerDto> passengers;
     private List<FlightSegmentDto> segments;
 
@@ -25,6 +36,13 @@ public class BookingDetailsResponseDto {
         private String lastName;
         private Integer age;
         private String type;
+
+        // Optional passenger-level fields if you later need them on confirmation
+        private String seatPreference;
+        private String mealPreference;
+        private String baggage;
+        private String outboundSeatNumber;
+        private String returnSeatNumber;
     }
 
     @Data
@@ -32,6 +50,7 @@ public class BookingDetailsResponseDto {
     public static class FlightSegmentDto {
         private String airlineName;
         private String flightNo;
+        private String flightType;     // ✅ From flighttype column
         private String departureAirport;
         private String arrivalAirport;
         private LocalDate departureDate;

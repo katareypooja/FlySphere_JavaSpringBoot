@@ -1,6 +1,6 @@
 /* Wrapper */
 .confirmation-wrapper {
-  background: #f5f7fb;
+  background: transparent; /* ✅ allow global travel background to show */
   min-height: 100vh;
   padding: 24px 0 40px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -82,8 +82,16 @@
 
 .booking-ref {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
 }
+
+/* ✅ Highlight Booking Reference Number */
+.top-card .value.booking-ref {
+  font-size: 22px;
+  color: #000000;
+  font-weight: 700;
+}
+
 
 .route-compact {
   font-weight: 600;

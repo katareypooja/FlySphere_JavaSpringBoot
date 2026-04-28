@@ -11,8 +11,18 @@ public class BookingRequestDto {
 
     private Double totalAmount;
 
-    private String tripType;   // oneway / round
-    private String cabinClass; // Economy / Business / First
+    // ✅ Contact details entered during booking (not account profile)
+    private String contactPhone;
+    private String contactEmail;
+
+    // ✅ Insurance selection
+    private Boolean insuranceSelected;
+
+    // ✅ Trip & Cabin Class Support (clean version - no duplicates)
+    private String tripType;              // oneway / round
+    private String cabinClass;            // for one-way
+    private String outboundCabinClass;    // for round-trip outbound
+    private String returnCabinClass;      // for round-trip return
 
     private List<PassengerDto> passengers;
 
