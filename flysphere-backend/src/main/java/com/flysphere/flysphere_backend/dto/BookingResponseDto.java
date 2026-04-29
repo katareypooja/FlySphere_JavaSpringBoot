@@ -17,5 +17,18 @@ public class BookingResponseDto {
     private String outboundFlightNo;
     private String returnFlightNo;
 
+    // ✅ Route + Date fields for My Bookings page
+    private String departureAirport;
+    private String arrivalAirport;
+    private java.time.LocalDate departureDate;
+
+    private String returnDepartureAirport;
+    private String returnArrivalAirport;
+    private java.time.LocalDate returnDate;
+
     private int passengerCount;
+
+    // ✅ Additional display fields
+    private String tripType;
+    private String cabinClass;
 }

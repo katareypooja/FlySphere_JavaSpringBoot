@@ -68,6 +68,16 @@ export class BookingNavbarComponent implements OnInit {
     }
   }
 
+  // ✅ Hide booking flow stepper on My Bookings page
+  get showBookingFlow(): boolean {
+    return !this.router.url.includes('my-bookings');
+  }
+
+  // ✅ Hide "My Bookings" option inside dropdown when already on it
+  get isMyBookingsPage(): boolean {
+    return this.router.url.includes('my-bookings');
+  }
+
   private updateStep() {
     const url = this.router.url;
 

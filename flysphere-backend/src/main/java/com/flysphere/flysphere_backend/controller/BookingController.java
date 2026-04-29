@@ -22,18 +22,67 @@ public class BookingController {
 
     // ✅ Logged-in user - Get My Bookings with filtering + pagination
     @GetMapping("/my")
-    public org.springframework.data.domain.Page<Booking> getMyBookings(
+    public org.springframework.data.domain.Page<com.flysphere.flysphere_backend.dto.BookingResponseDto> getMyBookings(
             @RequestParam(required = false) String bookingId,
             @RequestParam(required = false) String tripType,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type,
             org.springframework.data.domain.Pageable pageable) {
 
-        return bookingService.getBookingsForLoggedInUser(
+        var page = bookingService.getBookingsForLoggedInUser(
                 bookingId,
                 tripType,
                 status,
+                type,
                 pageable
         );
+
+        return page.map(booking -> {
+
+            var details = bookingService.getBookingDetails(booking.getBookingId());
+
+            var segments = details.getSegments();
+
+            var outbound = segments.get(0);
+
+            String returnDeparture = null;
+            String returnArrival = null;
+            java.time.LocalDate returnDate = null;
+
+            if (segments.size() > 1) {
+                var returnSeg = segments.get(1);
+                returnDeparture = returnSeg.getDepartureAirport();
+                returnArrival = returnSeg.getArrivalAirport();
+                returnDate = returnSeg.getDepartureDate();
+            }
+
+            return com.flysphere.flysphere_backend.dto.BookingResponseDto.builder()
+                    .bookingId(booking.getBookingId())
+                    .totalAmount(booking.getTotalAmount())
+                    .status(booking.getStatus())
+                    .createdAt(booking.getCreatedAt())
+                    .outboundFlightNo(outbound.getFlightNo())
+
+                    .departureAirport(outbound.getDepartureAirport())
+                    .arrivalAirport(outbound.getArrivalAirport())
+                    .departureDate(outbound.getDepartureDate())
+
+                    .returnDepartureAirport(returnDeparture)
+                    .returnArrivalAirport(returnArrival)
+                    .returnDate(returnDate)
+
+                    .tripType(booking.getTripType())
+                    .cabinClass(
+                        booking.getTripType() != null && booking.getTripType().equalsIgnoreCase("round")
+                            ? (booking.getOutboundCabinClass() != null
+                                ? booking.getOutboundCabinClass() + " - " + booking.getReturnCabinClass()
+                                : booking.getCabinClass())
+                            : booking.getCabinClass()
+                    )
+
+                    .passengerCount(details.getPassengers().size())
+                    .build();
+        });
     }
 
     // ✅ Admin Dashboard - Get All Bookings

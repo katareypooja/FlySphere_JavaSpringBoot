@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -159,6 +160,16 @@ public class BookingService {
                 .createdAt(booking.getCreatedAt())
                 .outboundFlightNo(outboundFlight.getFlightNo())
                 .returnFlightNo(returnFlight != null ? returnFlight.getFlightNo() : null)
+
+                // ✅ Route + Date mapping
+                .departureAirport(outboundFlight.getDepartureAirport())
+                .arrivalAirport(outboundFlight.getArrivalAirport())
+                .departureDate(outboundFlight.getDepartureDate())
+
+                .returnDepartureAirport(returnFlight != null ? returnFlight.getDepartureAirport() : null)
+                .returnArrivalAirport(returnFlight != null ? returnFlight.getArrivalAirport() : null)
+                .returnDate(returnFlight != null ? returnFlight.getDepartureDate() : null)
+
                 .passengerCount(seatsToBook)
                 .build();
     }
@@ -240,6 +251,7 @@ public class BookingService {
             String bookingId,
             String tripType,
             String status,
+            String type,
             org.springframework.data.domain.Pageable pageable) {
 
         var authentication = org.springframework.security.core.context.SecurityContextHolder
@@ -271,6 +283,22 @@ public class BookingService {
         if (status != null && !status.isEmpty()) {
             spec = spec.and((root, query, cb) ->
                     cb.equal(cb.lower(root.get("status")), status.toLowerCase()));
+        }
+
+        // ✅ Upcoming / Past filter (before pagination)
+        if (type != null && !type.isBlank()) {
+
+            LocalDateTime now = LocalDateTime.now();
+
+            if ("UPCOMING".equalsIgnoreCase(type)) {
+                spec = spec.and((root, query, cb) ->
+                        cb.greaterThan(root.get("flight").get("departureDate"), now));
+            }
+
+            if ("PAST".equalsIgnoreCase(type)) {
+                spec = spec.and((root, query, cb) ->
+                        cb.lessThanOrEqualTo(root.get("flight").get("departureDate"), now));
+            }
         }
 
         return bookingRepository.findAll(spec, pageable);
