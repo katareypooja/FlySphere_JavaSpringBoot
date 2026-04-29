@@ -22,29 +22,22 @@ export class BookingComponent implements OnInit, AfterViewInit {
   insurancePrice = 199;
   insuranceComboPrice = 299;
 
-  // ✅ Common travel insurance toggles (All Passengers)
-  travelInsurance = {
-    outbound: false,
-    return: false
-  };
+  // ✅ Simple booking-level insurance toggle
+  travelInsurance: boolean = false;
 
   // ✅ Derived common insurance pricing (for bottom card only)
-  get commonInsurancePerPassenger(): number {
-    if (this.bookingData?.tripType === 'round') {
-      if (this.travelInsurance.outbound && this.travelInsurance.return) {
-        return this.insuranceComboPrice;
-      }
-      if (this.travelInsurance.outbound || this.travelInsurance.return) {
-        return this.insurancePrice;
-      }
-      return 0;
-    } else {
-      return this.travelInsurance.outbound ? this.insurancePrice : 0;
-    }
-  }
-
   get commonInsuranceTotal(): number {
-    return this.commonInsurancePerPassenger * this.passengers.length;
+    if (!this.travelInsurance) return 0;
+
+    const isRound = this.bookingData?.tripType === 'round';
+
+    // ✅ Round trip = 299 per passenger
+    // ✅ One way = 199 per passenger
+    const pricePerPassenger = isRound
+      ? this.insuranceComboPrice   // 299
+      : this.insurancePrice;       // 199
+
+    return pricePerPassenger * this.passengers.length;
   }
 
   contact = {
@@ -476,6 +469,9 @@ export class BookingComponent implements OnInit, AfterViewInit {
     if (!this.validateBooking()) {
       return;
     }
+
+    // ✅ Attach selected insurance before navigating
+    this.bookingData.insuranceSelected = this.travelInsurance;
 
     this.router.navigate(['/review'], {
       state: {

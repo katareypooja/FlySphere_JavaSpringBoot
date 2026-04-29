@@ -61,23 +61,37 @@ export class ReviewComponent implements OnInit {
 
     totalAmount: this.totals?.grandTotal,
 
-    // ✅ Send contact phone entered in booking page
+    // ✅ Send booking-level contact + insurance
     contactPhone: this.contact?.phone,
+    contactEmail: this.contact?.email,
+    // ✅ Use simplified booking-level insurance
+    insuranceSelected: !!this.bookingData?.insuranceSelected,
 
-    // ✅ Flatten passenger preferences to match backend String fields
+    // ✅ Map passengers to new structured backend fields
     passengers: this.passengers.map(p => ({
-      ...p,
-      seatPreference: isRound
-        ? `${p.seatPreference?.outbound || ''}|${p.seatPreference?.return || ''}`
-        : (p.seatPreference?.outbound || ''),
+      title: p.title,
+      firstName: p.firstName,
+      lastName: p.lastName,
+      age: p.age,
+      type: p.type,
 
-      mealPreference: isRound
-        ? `${p.mealPreference?.outbound || ''}|${p.mealPreference?.return || ''}`
-        : (p.mealPreference?.outbound || ''),
+      // ✅ Outbound
+      outboundSeatNo: p.seatPreference?.outbound || null,
+      outboundSeat: p.seatPreference?.outbound || null,
+      outboundMeal: p.mealPreference?.outbound || null,
+      outboundBaggage: p.baggage?.outbound ? 'Yes' : null,
 
-      baggage: isRound
-        ? (p.baggage?.outbound || p.baggage?.return)
-        : p.baggage?.outbound
+      // ✅ Return
+      returnSeatNo: isRound ? (p.seatPreference?.return || null) : null,
+      returnSeat: isRound ? (p.seatPreference?.return || null) : null,
+      returnMeal: isRound ? (p.mealPreference?.return || null) : null,
+      returnBaggage: isRound && p.baggage?.return ? 'Yes' : null,
+
+      // ✅ Extras (booking-level insurance)
+      insuranceSelected: !!this.bookingData?.insuranceSelected,
+
+      email: this.contact?.email,
+      phone: this.contact?.phone
     }))
   };
 

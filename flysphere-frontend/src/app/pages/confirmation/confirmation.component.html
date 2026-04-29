@@ -121,7 +121,6 @@
               </ng-container>
             </span>
           </div>
-bt nv
           <!-- Timeline row -->
           <div class="ticket-body-row">
 
@@ -278,48 +277,70 @@ bt nv
               <span class="flight-value">{{ p.nationality }}</span>
             </div>
 
-            <!-- ✅ Seat (One way & Round trip) -->
-            <div class="flight-field" *ngIf="p.outboundSeatNumber">
+            <!-- ✅ Outbound Seat -->
+            <div class="flight-field" *ngIf="p.outboundSeatNo">
               <span class="flight-label">
                 Seat
                 <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
               </span>
-              <span class="flight-value">{{ p.outboundSeatNumber }}</span>
+              <span class="flight-value">{{ p.outboundSeatNo }}</span>
             </div>
 
+            <!-- ✅ Return Seat -->
             <div class="flight-field"
-                 *ngIf="tripType === 'round' && p.returnSeatNumber">
+                 *ngIf="tripType === 'round' && p.returnSeatNo">
               <span class="flight-label">Seat (Return)</span>
-              <span class="flight-value">{{ p.returnSeatNumber }}</span>
+              <span class="flight-value">{{ p.returnSeatNo }}</span>
             </div>
 
-            <!-- ✅ Meal -->
-            <div class="flight-field" *ngIf="p.meal">
-              <span class="flight-label">Meal</span>
-              <span class="flight-value">{{ p.meal }}</span>
+            <!-- ✅ Outbound Meal -->
+            <div class="flight-field" *ngIf="p.outboundMeal">
+              <span class="flight-label">
+                Meal
+                <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
+              </span>
+              <span class="flight-value">{{ p.outboundMeal | titlecase }}</span>
             </div>
 
-            <!-- ✅ Baggage -->
-            <div class="flight-field" *ngIf="p.baggage">
-              <span class="flight-label">Baggage</span>
-              <span class="flight-value">{{ p.baggage }}</span>
+            <!-- ✅ Return Meal -->
+            <div class="flight-field"
+                 *ngIf="tripType === 'round' && p.returnMeal">
+              <span class="flight-label">Meal (Return)</span>
+              <span class="flight-value">{{ p.returnMeal | titlecase }}</span>
             </div>
 
-            <!-- ✅ Insurance -->
+            <!-- ✅ Outbound Baggage -->
+            <div class="flight-field" *ngIf="p.outboundBaggage">
+              <span class="flight-label">
+                Baggage
+                <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
+              </span>
+              <span class="flight-value">{{ p.outboundBaggage }}</span>
+            </div>
+
+            <!-- ✅ Return Baggage -->
+            <div class="flight-field"
+                 *ngIf="tripType === 'round' && p.returnBaggage">
+              <span class="flight-label">Baggage (Return)</span>
+              <span class="flight-value">{{ p.returnBaggage }}</span>
+            </div>
+
+            <!-- ✅ Insurance (Booking Level) -->
             <div class="flight-field" *ngIf="bookingData?.insuranceSelected">
               <span class="flight-label">Insurance</span>
               <span class="flight-value">Covered</span>
             </div>
 
-            <!-- ✅ Contact & Email from Review -->
-            <div class="flight-field" *ngIf="bookingData?.contactPhone">
+            <!-- ✅ Passenger Contact -->
+            <div class="flight-field" *ngIf="p.phone">
               <span class="flight-label">Contact</span>
-              <span class="flight-value">{{ bookingData?.contactPhone }}</span>
+              <span class="flight-value">{{ p.phone }}</span>
             </div>
 
-            <div class="flight-field" *ngIf="bookingData?.contactEmail">
+            <!-- ✅ Passenger Email -->
+            <div class="flight-field" *ngIf="p.email">
               <span class="flight-label">Email</span>
-              <span class="flight-value">{{ bookingData?.contactEmail }}</span>
+              <span class="flight-value">{{ p.email }}</span>
             </div>
 
           </div>

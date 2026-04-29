@@ -166,7 +166,7 @@
             </span>
 
             <span class="addon-badge"
-                  *ngIf="totals?.addonsTotal && totals?.addonsTotal > 0">
+                  *ngIf="bookingData?.insuranceSelected">
               🛡 Insurance: Added
             </span>
 
@@ -219,7 +219,7 @@
 
             <span class="addon-badge">
               🛡 Insurance:
-              {{ totals?.addonsTotal && totals?.addonsTotal > 0 && (totals?.addonsTotal >= 199) ? 'Added' : 'Not Added' }}
+              {{ bookingData?.insuranceSelected ? 'Added' : 'Not Added' }}
             </span>
 
           </ng-template>

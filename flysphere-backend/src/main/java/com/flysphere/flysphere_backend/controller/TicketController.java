@@ -207,10 +207,10 @@ public class TicketController {
 
             if (!seatPassengers.isEmpty()) {
                 String seatNumber = (segments.size() == 1)
-                        ? seatPassengers.get(0).getOutboundSeatNumber()
+                        ? seatPassengers.get(0).getOutboundSeatNo()
                         : (i == 0
-                            ? seatPassengers.get(0).getOutboundSeatNumber()
-                            : seatPassengers.get(0).getReturnSeatNumber());
+                            ? seatPassengers.get(0).getOutboundSeatNo()
+                            : seatPassengers.get(0).getReturnSeatNo());
 
                 write(content, trim(seatNumber, 10), col5, y);
             }

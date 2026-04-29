@@ -33,8 +33,22 @@ public class BookingRequestDto {
         private String lastName;
         private Integer age;
         private String type; // adult / child
-        private String seatPreference;
-        private String mealPreference;
-        private Boolean baggage;
+
+        // ✅ Outbound Details
+        private String outboundSeatNo;
+        private String outboundSeat;
+        private String outboundMeal;
+        private String outboundBaggage;
+
+        // ✅ Return Details
+        private String returnSeatNo;
+        private String returnSeat;
+        private String returnMeal;
+        private String returnBaggage;
+
+        // ✅ Extras
+        private Boolean insuranceSelected;
+        private String email;
+        private String phone;
     }
 }
