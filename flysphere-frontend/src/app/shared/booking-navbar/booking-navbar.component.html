@@ -9,7 +9,7 @@
     <div class="tagline">Secure Booking</div>
   </div>
 
-  <div class="booking-steps">
+  <div class="booking-steps" *ngIf="showBookingFlow">
     <div class="step"
          [class.active]="currentStep === 1"
          [class.completed]="currentStep > 1"
@@ -72,7 +72,9 @@
             Search
           </button>
 
-          <button class="dropdown-item" (click)="goToMyBookings()">
+          <button *ngIf="!isMyBookingsPage"
+                  class="dropdown-item"
+                  (click)="goToMyBookings()">
             My Bookings
           </button>
 
