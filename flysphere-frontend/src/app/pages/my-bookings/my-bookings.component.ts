@@ -73,7 +73,13 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
           You have no bookings yet.
         </div>
 
-        <div *ngFor="let booking of bookings" class="booking-item">
+        <div *ngFor="let booking of bookings; let i = index" class="booking-row">
+
+          <div class="booking-number">
+            {{ i + 1 }}
+          </div>
+
+          <div class="booking-item">
 
           <!-- Header -->
           <div class="booking-header">
@@ -149,8 +155,9 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
               {{ canCancel(booking) ? 'Cancel Booking' : 'Cancellation Closed' }}
             </button>
           </div>
-
         </div>
+
+      </div>
 
       </div>
 
@@ -362,7 +369,22 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       box-shadow: none;
     }
 
+    .booking-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .booking-number {
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+      width: 35px;
+      text-align: center;
+    }
+
     .booking-item {
+      flex: 1;
       background: #ffffff;
       border-radius: 14px;
       padding: 22px;
