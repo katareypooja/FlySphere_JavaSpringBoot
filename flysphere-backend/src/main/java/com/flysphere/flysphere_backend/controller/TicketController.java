@@ -172,7 +172,6 @@ public class TicketController {
             write(content, "Airline", col2, y);
             write(content, "Aircraft", col3, y);
             write(content, "Seat Type", col4, y);
-            write(content, "Seat No", col5, y);
 
             y -= 16;
             content.setFont(PDType1Font.HELVETICA, 11);
@@ -196,24 +195,7 @@ public class TicketController {
                     trim(seatType != null ? seatType : "", 16),
                     col4, y);
 
-            // ✅ Seat column for both one-way and round trip
-            java.util.List<com.flysphere.flysphere_backend.model.Passenger> seatPassengers =
-                    entityManager.createQuery(
-                            "SELECT p FROM Passenger p WHERE p.booking.id = :id",
-                            com.flysphere.flysphere_backend.model.Passenger.class
-                    )
-                    .setParameter("id", booking.getId())
-                    .getResultList();
-
-            if (!seatPassengers.isEmpty()) {
-                String seatNumber = (segments.size() == 1)
-                        ? seatPassengers.get(0).getOutboundSeatNo()
-                        : (i == 0
-                            ? seatPassengers.get(0).getOutboundSeatNo()
-                            : seatPassengers.get(0).getReturnSeatNo());
-
-                write(content, trim(seatNumber, 10), col5, y);
-            }
+            // ✅ Seat number removed from flight section (now shown in passenger section)
 
             y -= 22;
 
@@ -270,18 +252,31 @@ public class TicketController {
         write(content, "Name", col1, y);
         write(content, "Age", col2, y);
         write(content, "Type", col3, y);
-        write(content, "Contact No", col4, y);
+        write(content, "Seat", col4, y);
+        write(content, "Contact No", col5, y);
 
         y -= 16;
         content.setFont(PDType1Font.HELVETICA, 11);
 
         for (com.flysphere.flysphere_backend.model.Passenger p : passengerList) {
+
             write(content, trim(p.getFirstName() + " " + p.getLastName(), 20), col1, y);
             write(content, String.valueOf(p.getAge()), col2, y);
             write(content, p.getType(), col3, y);
 
-            // ✅ Show booking contact number instead of seat in passenger section
-            write(content, trim(booking.getContactPhone(), 18), col4, y);
+            String seatDisplay;
+
+            if ("round".equalsIgnoreCase(booking.getTripType())) {
+                seatDisplay = p.getOutboundSeat() + " - " + p.getReturnSeat();
+            } else {
+                seatDisplay = p.getOutboundSeat();
+            }
+
+            write(content, trim(seatDisplay, 18), col4, y);
+
+            // ✅ Show passenger contact number beside seat
+            write(content, trim(p.getPhone(), 15), col5, y);
+
             y -= 16;
         }
 
