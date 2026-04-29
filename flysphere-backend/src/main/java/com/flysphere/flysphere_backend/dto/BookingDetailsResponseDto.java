@@ -37,12 +37,22 @@ public class BookingDetailsResponseDto {
         private Integer age;
         private String type;
 
-        // Optional passenger-level fields if you later need them on confirmation
-        private String seatPreference;
-        private String mealPreference;
-        private String baggage;
-        private String outboundSeatNumber;
-        private String returnSeatNumber;
+        // ✅ Outbound
+        private String outboundSeatNo;
+        private String outboundSeat;
+        private String outboundMeal;
+        private String outboundBaggage;
+
+        // ✅ Return
+        private String returnSeatNo;
+        private String returnSeat;
+        private String returnMeal;
+        private String returnBaggage;
+
+        // ✅ Extras
+        private Boolean insuranceSelected;
+        private String email;
+        private String phone;
     }
 
     @Data

@@ -198,9 +198,15 @@
 
             <!-- ✅ Common insurance share per passenger -->
             <div class="row"
-                 *ngIf="commonInsurancePerPassenger > 0">
+                 *ngIf="travelInsurance">
               <span>Travel Protection</span>
-              <span>₹ {{ commonInsurancePerPassenger }}</span>
+              <span>
+                ₹ {{
+                  bookingData?.tripType === 'round'
+                    ? insuranceComboPrice
+                    : insurancePrice
+                }}
+              </span>
             </div>
 
             <!-- ✅ If No Add‑Ons Selected (including common insurance) -->
@@ -212,7 +218,11 @@
                      + (bookingData?.tripType === 'round' ? getMealPrice(p.mealPreference?.return) : 0)
                      + (p.baggage?.outbound ? baggagePrice : 0)
                      + (bookingData?.tripType === 'round' && p.baggage?.return ? baggagePrice : 0)
-                     + commonInsurancePerPassenger
+                     + (travelInsurance
+                         ? (bookingData?.tripType === 'round'
+                             ? insuranceComboPrice
+                             : insurancePrice)
+                         : 0)
                    ) === 0
                  ">
               <span style="color:#6b7280;">None selected</span>
@@ -533,7 +543,7 @@
 
       <!-- ✅ COMMON TRAVEL PROTECTION (ALL PASSENGERS) -->
   <div class="luxury-addon-card insurance-card"
-     [class.active]="travelInsurance.outbound || (bookingData?.tripType === 'round' && travelInsurance.return)">
+     [class.active]="travelInsurance">
 
   <div class="addon-content">
     <div class="addon-header">
@@ -552,53 +562,23 @@
       <span>24×7 Assistance</span>
     </div>
 
-    <ng-container *ngIf="bookingData?.tripType !== 'round'; else roundCommon">
-      <div class="addon-row" style="margin-top:10px;">
-        <div class="left">
-          Travel Protection – ₹{{ insurancePrice }} per passenger
-        </div>
-        <div class="right">
-          <label class="switch">
-            <input type="checkbox" [(ngModel)]="travelInsurance.outbound" />
-            <span class="slider"></span>
-          </label>
-        </div>
+    <div class="addon-row" style="margin-top:10px;">
+      <div class="left">
+        Travel Protection –
+        ₹ {{
+            bookingData?.tripType === 'round'
+              ? insuranceComboPrice
+              : insurancePrice
+          }}
+        per passenger
       </div>
-    </ng-container>
-
-    <ng-template #roundCommon>
-      <div class="addon-row" style="margin-top:10px;">
-        <div class="left">
-          Departure Protection – ₹{{ insurancePrice }} per passenger
-        </div>
-        <div class="right">
-          <label class="switch">
-            <input type="checkbox" [(ngModel)]="travelInsurance.outbound" />
-            <span class="slider"></span>
-          </label>
-        </div>
+      <div class="right">
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="travelInsurance" />
+          <span class="slider"></span>
+        </label>
       </div>
-
-      <div class="addon-row" style="margin-top:8px;">
-        <div class="left">
-          Return Protection – ₹{{ insurancePrice }} per passenger
-        </div>
-        <div class="right">
-          <label class="switch">
-            <input type="checkbox" [(ngModel)]="travelInsurance.return" />
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div *ngIf="travelInsurance.outbound && travelInsurance.return"
-           style="margin-top:8px; font-size:12px; color:#16a34a; font-weight:600;">
-        ✅ Combo Offer Applied – ₹{{ insuranceComboPrice }} per passenger
-        <span style="color:#059669;">
-          (You saved ₹{{ insurancePrice * 2 - insuranceComboPrice }} each)
-        </span>
-      </div>
-    </ng-template>
+    </div>
   </div>
 </div>
 

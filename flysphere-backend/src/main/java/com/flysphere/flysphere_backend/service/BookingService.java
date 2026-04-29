@@ -127,14 +127,6 @@ public class BookingService {
         if (request.getPassengers() != null) {
             for (BookingRequestDto.PassengerDto p : request.getPassengers()) {
 
-                // ✅ Auto Seat Assignment Logic
-                String outboundSeat = assignSeatNumber(request.getTripType(), p.getSeatPreference(), true);
-                String returnSeat = null;
-
-                if ("round".equalsIgnoreCase(request.getTripType())) {
-                    returnSeat = assignSeatNumber(request.getTripType(), p.getSeatPreference(), false);
-                }
-
                 Passenger passenger = Passenger.builder()
                         .booking(booking)
                         .title(p.getTitle())
@@ -142,11 +134,23 @@ public class BookingService {
                         .lastName(p.getLastName())
                         .age(p.getAge())
                         .type(p.getType())
-                        .seatPreference(p.getSeatPreference())
-                        .mealPreference(p.getMealPreference())
-                        .baggage(p.getBaggage())
-                        .outboundSeatNumber(outboundSeat)
-                        .returnSeatNumber(returnSeat)
+
+                        // ✅ Outbound
+                        .outboundSeatNo(p.getOutboundSeatNo())
+                        .outboundSeat(p.getOutboundSeat())
+                        .outboundMeal(p.getOutboundMeal())
+                        .outboundBaggage(p.getOutboundBaggage())
+
+                        // ✅ Return
+                        .returnSeatNo(p.getReturnSeatNo())
+                        .returnSeat(p.getReturnSeat())
+                        .returnMeal(p.getReturnMeal())
+                        .returnBaggage(p.getReturnBaggage())
+
+                        // ✅ Extras
+                        .insuranceSelected(p.getInsuranceSelected())
+                        .email(p.getEmail())
+                        .phone(p.getPhone())
                         .build();
 
                 entityManager.persist(passenger);
@@ -401,11 +405,23 @@ public class BookingService {
                                 .lastName(p.getLastName())
                                 .age(p.getAge())
                                 .type(p.getType())
-                                .seatPreference(p.getSeatPreference())
-                                .mealPreference(p.getMealPreference())
-                                .baggage(p.getBaggage() != null ? p.getBaggage().toString() : null)
-                                .outboundSeatNumber(p.getOutboundSeatNumber())
-                                .returnSeatNumber(p.getReturnSeatNumber())
+
+                                // ✅ Outbound
+                                .outboundSeatNo(p.getOutboundSeatNo())
+                                .outboundSeat(p.getOutboundSeat())
+                                .outboundMeal(p.getOutboundMeal())
+                                .outboundBaggage(p.getOutboundBaggage())
+
+                                // ✅ Return
+                                .returnSeatNo(p.getReturnSeatNo())
+                                .returnSeat(p.getReturnSeat())
+                                .returnMeal(p.getReturnMeal())
+                                .returnBaggage(p.getReturnBaggage())
+
+                                // ✅ Extras
+                                .insuranceSelected(p.getInsuranceSelected())
+                                .email(p.getEmail())
+                                .phone(p.getPhone())
                                 .build())
                         .toList();
 
