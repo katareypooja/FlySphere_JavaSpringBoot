@@ -25,6 +25,19 @@
           This booking has been cancelled. Seats have been released.
         </p>
       </div>
+
+      <!-- ✅ Download Button Moved To Top -->
+      <div style="margin-left:auto;">
+        <button class="download-btn"
+                (click)="downloadTicket()"
+                [disabled]="bookingData?.status === 'CANCELLED'"
+                [ngStyle]="{
+                  opacity: bookingData?.status === 'CANCELLED' ? 0.5 : 1,
+                  cursor: bookingData?.status === 'CANCELLED' ? 'not-allowed' : 'pointer'
+                }">
+          Download E‑Ticket (PDF)
+        </button>
+      </div>
     </div>
  
     <!-- ✅ SUMMARY ROW -->
@@ -129,6 +142,9 @@
               <div class="time-main">
                 {{ outboundFlight?.departureTime }}
               </div>
+              <div class="date-sub">
+                {{ outboundFlight?.departureDate | date:'EEE, dd MMM yyyy' }}
+              </div>
               <div class="airport-sub">
                 {{ outboundFlight?.departureAirport }}
               </div>
@@ -145,6 +161,12 @@
             <div class="time-col">
               <div class="time-main">
                 {{ outboundFlight?.arrivalTime }}
+              </div>
+              <div class="date-sub">
+                {{
+                  (outboundFlight?.arrivalDate || outboundFlight?.departureDate)
+                    | date:'EEE, dd MMM yyyy'
+                }}
               </div>
               <div class="airport-sub">
                 {{ outboundFlight?.arrivalAirport }}
@@ -216,6 +238,9 @@
               <div class="time-main">
                 {{ returnFlight?.departureTime }}
               </div>
+              <div class="date-sub">
+                {{ returnFlight?.departureDate | date:'EEE, dd MMM yyyy' }}
+              </div>
               <div class="airport-sub">
                 {{ returnFlight?.departureAirport }}
               </div>
@@ -232,6 +257,12 @@
             <div class="time-col">
               <div class="time-main">
                 {{ returnFlight?.arrivalTime }}
+              </div>
+              <div class="date-sub">
+                {{
+                  (returnFlight?.arrivalDate || returnFlight?.departureDate)
+                    | date:'EEE, dd MMM yyyy'
+                }}
               </div>
               <div class="airport-sub">
                 {{ returnFlight?.arrivalAirport }}
@@ -283,14 +314,28 @@
                 Seat
                 <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
               </span>
-              <span class="flight-value">{{ p.outboundSeatNo }}</span>
+              <span class="flight-value">
+                <ng-container *ngIf="p.outboundSeat; else outboundAutoSeat">
+                  {{ p.outboundSeat | titlecase }} ({{ p.outboundSeatNo }})
+                </ng-container>
+                <ng-template #outboundAutoSeat>
+                  *({{ p.outboundSeatNo }})
+                </ng-template>
+              </span>
             </div>
 
             <!-- ✅ Return Seat -->
             <div class="flight-field"
                  *ngIf="tripType === 'round' && p.returnSeatNo">
               <span class="flight-label">Seat (Return)</span>
-              <span class="flight-value">{{ p.returnSeatNo }}</span>
+              <span class="flight-value">
+                <ng-container *ngIf="p.returnSeat; else returnAutoSeat">
+                  {{ p.returnSeat | titlecase }} ({{ p.returnSeatNo }})
+                </ng-container>
+                <ng-template #returnAutoSeat>
+                  *({{ p.returnSeatNo }})
+                </ng-template>
+              </span>
             </div>
 
             <!-- ✅ Outbound Meal -->
@@ -349,20 +394,6 @@
  
     </div>
  
-    <!-- ✅ ACTION (Download only) -->
-    <div class="confirmation-action">
-      <div class="confirmation-action-left">
-        <button class="download-btn"
-                (click)="downloadTicket()"
-                [disabled]="bookingData?.status === 'CANCELLED'"
-                [ngStyle]="{
-                  opacity: bookingData?.status === 'CANCELLED' ? 0.5 : 1,
-                  cursor: bookingData?.status === 'CANCELLED' ? 'not-allowed' : 'pointer'
-                }">
-          Download E‑Ticket (PDF)
-        </button>
-      </div>
-    </div>
  
   </div>
  

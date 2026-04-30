@@ -127,6 +127,23 @@ public class BookingService {
         if (request.getPassengers() != null) {
             for (BookingRequestDto.PassengerDto p : request.getPassengers()) {
 
+                // ✅ Generate seat numbers based on availability + preference
+                String outboundSeatNo = generateAvailableSeatNumber(
+                        outboundFlight,
+                        p.getOutboundSeat(),
+                        true
+                );
+
+                String returnSeatNo = null;
+
+                if (returnFlight != null) {
+                    returnSeatNo = generateAvailableSeatNumber(
+                            returnFlight,
+                            p.getReturnSeat(), // may be null (as per availability)
+                            false
+                    );
+                }
+
                 Passenger passenger = Passenger.builder()
                         .booking(booking)
                         .title(p.getTitle())
@@ -136,13 +153,13 @@ public class BookingService {
                         .type(p.getType())
 
                         // ✅ Outbound
-                        .outboundSeatNo(p.getOutboundSeatNo())
+                        .outboundSeatNo(outboundSeatNo)
                         .outboundSeat(p.getOutboundSeat())
                         .outboundMeal(p.getOutboundMeal())
                         .outboundBaggage(p.getOutboundBaggage())
 
                         // ✅ Return
-                        .returnSeatNo(p.getReturnSeatNo())
+                        .returnSeatNo(returnSeatNo)
                         .returnSeat(p.getReturnSeat())
                         .returnMeal(p.getReturnMeal())
                         .returnBaggage(p.getReturnBaggage())
@@ -210,36 +227,62 @@ public class BookingService {
         }
     }
 
-    // ✅ Simple Auto Seat Assignment (Basic Version)
-    private String assignSeatNumber(String tripType, String seatPreference, boolean isOutbound) {
+    // ✅ Availability-based seat allocation
+    private String generateAvailableSeatNumber(Flight flight, String seatPreference, boolean isOutbound) {
+
+        List<String> bookedSeats;
+
+        if (isOutbound) {
+            bookedSeats = entityManager.createQuery(
+                    "SELECT p.outboundSeatNo FROM Passenger p " +
+                            "JOIN BookingSegment bs ON bs.booking = p.booking " +
+                            "WHERE bs.flight.flightId = :flightId",
+                    String.class
+            ).setParameter("flightId", flight.getFlightId())
+                    .getResultList();
+        } else {
+            bookedSeats = entityManager.createQuery(
+                    "SELECT p.returnSeatNo FROM Passenger p " +
+                            "JOIN BookingSegment bs ON bs.booking = p.booking " +
+                            "WHERE bs.flight.flightId = :flightId",
+                    String.class
+            ).setParameter("flightId", flight.getFlightId())
+                    .getResultList();
+        }
 
         String[] windowSeats = {"A", "F"};
         String[] aisleSeats = {"C", "D"};
         String[] middleSeats = {"B", "E"};
         String[] allSeats = {"A", "B", "C", "D", "E", "F"};
 
-        int row = 10 + (int)(Math.random() * 20); // Economy rows 10–29
+        for (int row = 10; row <= 29; row++) {
 
-        String seatLetter;
+            String[] seatPool;
 
-        if (seatPreference == null || seatPreference.isBlank()) {
-            // No preference → random seat
-            seatLetter = allSeats[(int)(Math.random() * allSeats.length)];
-        } else {
-            String pref = seatPreference.toLowerCase();
-
-            if (pref.contains("window")) {
-                seatLetter = windowSeats[(int)(Math.random() * windowSeats.length)];
-            } else if (pref.contains("aisle")) {
-                seatLetter = aisleSeats[(int)(Math.random() * aisleSeats.length)];
-            } else if (pref.contains("middle")) {
-                seatLetter = middleSeats[(int)(Math.random() * middleSeats.length)];
+            if (seatPreference == null || seatPreference.isBlank()) {
+                seatPool = allSeats;
             } else {
-                seatLetter = allSeats[(int)(Math.random() * allSeats.length)];
+                String pref = seatPreference.toLowerCase();
+                if (pref.contains("window")) {
+                    seatPool = windowSeats;
+                } else if (pref.contains("aisle")) {
+                    seatPool = aisleSeats;
+                } else if (pref.contains("middle")) {
+                    seatPool = middleSeats;
+                } else {
+                    seatPool = allSeats;
+                }
+            }
+
+            for (String letter : seatPool) {
+                String candidate = row + letter;
+                if (!bookedSeats.contains(candidate)) {
+                    return candidate;
+                }
             }
         }
 
-        return row + seatLetter;
+        throw new RuntimeException("No seats available for flight " + flight.getFlightNo());
     }
 
     private String generateBookingId() {

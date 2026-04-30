@@ -6,18 +6,30 @@ html, body {
   height: 100%;
 }
 
-html {
-  overflow-y: scroll;
-}
-
+/* ✅ Global Airplane Background For All Pages */
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
-  background: linear-gradient(rgba(0, 70, 140, 0.6), rgba(0, 70, 140, 0.6)),
-              url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e') no-repeat center center/cover;
-  background-attachment: fixed; /* ✅ same full-page travel background everywhere */
+
+  background:
+    linear-gradient(rgba(0, 70, 160, 0.35), rgba(0, 70, 160, 0.35)),
+    url("https://orbitshub.com/wp-content/uploads/2023/09/Stay-Updated-with-Airline-Tracker-Live_-Real-Time-Flight-Information-1024x559.jpg")
+    no-repeat center center fixed;
+
+  background-size: cover;
 }
+
+/* Ensure app takes full height over background */
+app-root {
+  display: block;
+  min-height: 100vh;
+}
+
+html {
+  overflow-y: scroll;
+}
+
 
 /* ✅ Auth wrapper keeps centering only (background now global) */
 .auth-wrapper {

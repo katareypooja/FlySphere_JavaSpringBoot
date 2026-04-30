@@ -248,34 +248,56 @@ public class TicketController {
                 .setParameter("id", booking.getId())
                 .getResultList();
 
+        boolean isRound = "round".equalsIgnoreCase(booking.getTripType());
+
+        float pCol1 = col1;                                   // Name
+        float pCol2 = margin + usableWidth * 0.18f;           // Age
+        float pCol3 = margin + usableWidth * 0.28f;           // Type
+        float pCol4 = margin + usableWidth * 0.40f;           // Seat Outbound
+        float pCol5 = margin + usableWidth * 0.62f;           // Seat Return (only round)
+        float pCol6 = margin + usableWidth * (isRound ? 0.82f : 0.70f); // Contact shifts if one-way
+
         content.setFont(PDType1Font.HELVETICA_BOLD, 11);
-        write(content, "Name", col1, y);
-        write(content, "Age", col2, y);
-        write(content, "Type", col3, y);
-        write(content, "Seat", col4, y);
-        write(content, "Contact No", col5, y);
+        write(content, "Name", pCol1, y);
+        write(content, "Age", pCol2, y);
+        write(content, "Type", pCol3, y);
+        write(content, "Seat (Outbound)", pCol4, y);
+
+        if (isRound) {
+            write(content, "Seat (Return)", pCol5, y);
+        }
+
+        write(content, "Contact No", pCol6, y);
 
         y -= 16;
         content.setFont(PDType1Font.HELVETICA, 11);
 
         for (com.flysphere.flysphere_backend.model.Passenger p : passengerList) {
 
-            write(content, trim(p.getFirstName() + " " + p.getLastName(), 20), col1, y);
-            write(content, String.valueOf(p.getAge()), col2, y);
-            write(content, p.getType(), col3, y);
+            write(content, trim(p.getFirstName() + " " + p.getLastName(), 20), pCol1, y);
+            write(content, String.valueOf(p.getAge()), pCol2, y);
+            write(content, p.getType(), pCol3, y);
 
-            String seatDisplay;
-
-            if ("round".equalsIgnoreCase(booking.getTripType())) {
-                seatDisplay = p.getOutboundSeat() + " - " + p.getReturnSeat();
-            } else {
-                seatDisplay = p.getOutboundSeat();
+            String outboundSeatDisplay = "";
+            if (p.getOutboundSeat() != null && p.getOutboundSeatNo() != null) {
+                outboundSeatDisplay = p.getOutboundSeat() + " (" + p.getOutboundSeatNo() + ")";
+            } else if (p.getOutboundSeatNo() != null) {
+                outboundSeatDisplay = "*(" + p.getOutboundSeatNo() + ")";
             }
 
-            write(content, trim(seatDisplay, 18), col4, y);
+            write(content, trim(outboundSeatDisplay, 20), pCol4, y);
 
-            // ✅ Show passenger contact number beside seat
-            write(content, trim(p.getPhone(), 15), col5, y);
+            if (isRound) {
+                String returnSeatDisplay = "";
+                if (p.getReturnSeat() != null && p.getReturnSeatNo() != null) {
+                    returnSeatDisplay = p.getReturnSeat() + " (" + p.getReturnSeatNo() + ")";
+                } else if (p.getReturnSeatNo() != null) {
+                    returnSeatDisplay = "*(" + p.getReturnSeatNo() + ")";
+                }
+                write(content, trim(returnSeatDisplay, 20), pCol5, y);
+            }
+
+            write(content, trim(p.getPhone(), 15), pCol6, y);
 
             y -= 16;
         }

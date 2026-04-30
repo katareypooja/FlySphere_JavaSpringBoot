@@ -565,7 +565,7 @@
   padding: 16px;
   border-radius: 999px;
   border: none;
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  background: linear-gradient(90deg, #2563eb, #2563eb);
   color: #ffffff;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -597,7 +597,7 @@
   border: none;
   font-size: 14px;
   font-weight: 600;
-  background: #1e3a8a;
+  background:#2563eb;
   color: #ffffff;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;

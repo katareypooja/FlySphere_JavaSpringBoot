@@ -250,6 +250,14 @@
   color: #7a859d;
 }
 
+/* ✅ Date styling same color as airport (DEL / BOM) */
+.date-sub {
+  font-size: 12px;
+  color: #7a859d;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
 /* vertical dotted line between origin & destination */
 .timeline-col {
   display: flex;
