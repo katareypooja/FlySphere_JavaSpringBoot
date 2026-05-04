@@ -276,7 +276,7 @@
         </div>
 
       </div>
- 
+
       <!-- ✅ Passengers (moved below flights, full width) -->
       <div class="passengers-section" *ngIf="passengers.length">
         <div class="section-title">Passengers</div>
@@ -382,6 +382,45 @@
             </div>
           </details>
         </div>
+      </div>
+
+      <!-- ✅ Fare breakdown dropdown (moved below Passengers) -->
+      <div class="price-card fare-card" *ngIf="totals">
+        <details class="fare-details">
+          <summary class="fare-summary">
+            <h3>Fare Breakdown</h3>
+            <span class="fare-grand">₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
+          </summary>
+
+          <div class="fare-body">
+            <div class="row">
+              <span>Base Fare</span>
+              <span>₹ {{ (totals?.baseTotal ?? 0) | number:'1.0-0' }}</span>
+            </div>
+
+            <div class="row">
+              <span>Add-ons</span>
+              <span>₹ {{ (totals?.addonsTotal ?? 0) | number:'1.0-0' }}</span>
+            </div>
+
+            <div class="row">
+              <span>Taxes</span>
+              <span>₹ {{ (totals?.taxAmount ?? 0) | number:'1.0-0' }}</span>
+            </div>
+
+            <div class="row">
+              <span>Convenience Fee</span>
+              <span>₹ {{ (totals?.convenienceFee ?? 0) | number:'1.0-0' }}</span>
+            </div>
+
+            <hr>
+
+            <div class="row grand">
+              <span>Total</span>
+              <span>₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </details>
       </div>
  
     </div>
