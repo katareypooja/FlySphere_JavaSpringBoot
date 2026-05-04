@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -333,18 +335,50 @@ public class BookingService {
         }
 
         // ✅ Upcoming / Past filter (before pagination)
+        // Compare using full departure datetime (departureDate + departureTime).
+        // Your Flight entity stores:
+        //   departureDate: LocalDate
+        //   departureTime: LocalTime
+        // so we should NOT compare departureDate with LocalDateTime.
         if (type != null && !type.isBlank()) {
 
             LocalDateTime now = LocalDateTime.now();
 
             if ("UPCOMING".equalsIgnoreCase(type)) {
-                spec = spec.and((root, query, cb) ->
-                        cb.greaterThan(root.get("flight").get("departureDate"), now));
+                spec = spec.and((root, query, cb) -> {
+                    var flight = root.get("flight");
+                    var depDate = flight.get("departureDate");   // LocalDate
+                    var depTime = flight.get("departureTime");   // LocalTime (nullable)
+                    var safeTime = cb.coalesce(depTime, LocalTime.MIDNIGHT);
+
+                    // Build comparable datetime using SQL TIMESTAMP(date, time)
+                    var depDateTime = cb.function(
+                            "timestamp",
+                            LocalDateTime.class,
+                            depDate,
+                            safeTime
+                    );
+
+                    return cb.greaterThan(depDateTime, now);
+                });
             }
 
             if ("PAST".equalsIgnoreCase(type)) {
-                spec = spec.and((root, query, cb) ->
-                        cb.lessThanOrEqualTo(root.get("flight").get("departureDate"), now));
+                spec = spec.and((root, query, cb) -> {
+                    var flight = root.get("flight");
+                    var depDate = flight.get("departureDate");
+                    var depTime = flight.get("departureTime");
+                    var safeTime = cb.coalesce(depTime, LocalTime.MIDNIGHT);
+
+                    var depDateTime = cb.function(
+                            "timestamp",
+                            LocalDateTime.class,
+                            depDate,
+                            safeTime
+                    );
+
+                    return cb.lessThanOrEqualTo(depDateTime, now);
+                });
             }
         }
 
