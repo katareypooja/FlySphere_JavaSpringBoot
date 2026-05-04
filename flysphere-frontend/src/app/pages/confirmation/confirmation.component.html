@@ -143,11 +143,11 @@
               <div class="time-main">
                 {{ outboundFlight?.departureTime }}
               </div>
-              <div class="date-sub">
-                {{ outboundFlight?.departureDate | date:'EEE, dd MMM yyyy' }}
-              </div>
               <div class="airport-sub">
                 {{ outboundFlight?.departureAirport }}
+              </div>
+              <div class="date-sub">
+                {{ outboundFlight?.departureDate | date:'EEE, dd MMM yyyy' }}
               </div>
             </div>
 
@@ -163,14 +163,14 @@
               <div class="time-main">
                 {{ outboundFlight?.arrivalTime }}
               </div>
+              <div class="airport-sub">
+                {{ outboundFlight?.arrivalAirport }}
+              </div>
               <div class="date-sub">
                 {{
                   (outboundFlight?.arrivalDate || outboundFlight?.departureDate)
                     | date:'EEE, dd MMM yyyy'
                 }}
-              </div>
-              <div class="airport-sub">
-                {{ outboundFlight?.arrivalAirport }}
               </div>
             </div>
 
@@ -239,11 +239,11 @@
               <div class="time-main">
                 {{ returnFlight?.departureTime }}
               </div>
-              <div class="date-sub">
-                {{ returnFlight?.departureDate | date:'EEE, dd MMM yyyy' }}
-              </div>
               <div class="airport-sub">
                 {{ returnFlight?.departureAirport }}
+              </div>
+              <div class="date-sub">
+                {{ returnFlight?.departureDate | date:'EEE, dd MMM yyyy' }}
               </div>
             </div>
 
@@ -259,14 +259,14 @@
               <div class="time-main">
                 {{ returnFlight?.arrivalTime }}
               </div>
+              <div class="airport-sub">
+                {{ returnFlight?.arrivalAirport }}
+              </div>
               <div class="date-sub">
                 {{
                   (returnFlight?.arrivalDate || returnFlight?.departureDate)
                     | date:'EEE, dd MMM yyyy'
                 }}
-              </div>
-              <div class="airport-sub">
-                {{ returnFlight?.arrivalAirport }}
               </div>
             </div>
 
