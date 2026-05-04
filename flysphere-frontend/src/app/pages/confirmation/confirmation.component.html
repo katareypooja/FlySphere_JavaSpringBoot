@@ -78,7 +78,8 @@
     <div class="confirmation-details">
 
       <!-- ✅ Ticket-style flight cards like reference screenshot -->
-      <div class="flight-tickets">
+      <div class="flight-tickets"
+           [ngClass]="{ 'round-trip': tripType === 'round' && returnFlight }">
 
         <!-- Onward / Single leg ticket -->
         <div class="ticket-card" *ngIf="outboundFlight">
@@ -276,120 +277,111 @@
 
       </div>
  
-      <div class="details-section">
+      <!-- ✅ Passengers (moved below flights, full width) -->
+      <div class="passengers-section" *ngIf="passengers.length">
         <div class="section-title">Passengers</div>
 
-        <ng-container *ngIf="passengers.length">
-          <div class="passenger-card" *ngFor="let p of passengers; let i = index">
-            <div class="flight-field">
-              <span class="flight-label">Passenger {{ i + 1 }}</span>
-              <span class="flight-value">
-                {{ p.firstName }} {{ p.lastName }}
+        <div class="passenger-accordion" *ngFor="let p of passengers; let i = index">
+          <details class="passenger-details">
+            <summary class="passenger-summary">
+              <span class="summary-name">Passenger {{ i + 1 }}: {{ p.firstName }} {{ p.lastName }}</span>
+              <span class="summary-meta">
+                <ng-container *ngIf="p.age">Age: {{ p.age }}</ng-container>
+                <ng-container *ngIf="p.age">&nbsp;•&nbsp;</ng-container>
+                <span>Type: {{ p.type | titlecase }}</span>
               </span>
-            </div>
+            </summary>
 
-            <div class="flight-field">
-              <span class="flight-label">Type</span>
-              <span class="flight-value">{{ p.type | titlecase }}</span>
-            </div>
+            <div class="passenger-card">
+              <div class="flight-field" *ngIf="p.gender">
+                <span class="flight-label">Gender</span>
+                <span class="flight-value">{{ p.gender | titlecase }}</span>
+              </div>
 
-            <div class="flight-field" *ngIf="p.gender">
-              <span class="flight-label">Gender</span>
-              <span class="flight-value">{{ p.gender | titlecase }}</span>
-            </div>
+              <div class="flight-field" *ngIf="p.nationality">
+                <span class="flight-label">Nationality</span>
+                <span class="flight-value">{{ p.nationality }}</span>
+              </div>
 
-            <div class="flight-field" *ngIf="p.age">
-              <span class="flight-label">Age</span>
-              <span class="flight-value">{{ p.age }}</span>
-            </div>
+              <!-- ✅ Outbound Seat -->
+              <div class="flight-field" *ngIf="p.outboundSeatNo">
+                <span class="flight-label">
+                  Seat
+                  <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
+                </span>
+                <span class="flight-value">
+                  <ng-container *ngIf="p.outboundSeat; else outboundAutoSeat">
+                    {{ p.outboundSeat | titlecase }} ({{ p.outboundSeatNo }})
+                  </ng-container>
+                  <ng-template #outboundAutoSeat>
+                    *({{ p.outboundSeatNo }})
+                  </ng-template>
+                </span>
+              </div>
 
-            <div class="flight-field" *ngIf="p.nationality">
-              <span class="flight-label">Nationality</span>
-              <span class="flight-value">{{ p.nationality }}</span>
-            </div>
+              <!-- ✅ Return Seat -->
+              <div class="flight-field" *ngIf="tripType === 'round' && p.returnSeatNo">
+                <span class="flight-label">Seat (Return)</span>
+                <span class="flight-value">
+                  <ng-container *ngIf="p.returnSeat; else returnAutoSeat">
+                    {{ p.returnSeat | titlecase }} ({{ p.returnSeatNo }})
+                  </ng-container>
+                  <ng-template #returnAutoSeat>
+                    *({{ p.returnSeatNo }})
+                  </ng-template>
+                </span>
+              </div>
 
-            <!-- ✅ Outbound Seat -->
-            <div class="flight-field" *ngIf="p.outboundSeatNo">
-              <span class="flight-label">
-                Seat
-                <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
-              </span>
-              <span class="flight-value">
-                <ng-container *ngIf="p.outboundSeat; else outboundAutoSeat">
-                  {{ p.outboundSeat | titlecase }} ({{ p.outboundSeatNo }})
-                </ng-container>
-                <ng-template #outboundAutoSeat>
-                  *({{ p.outboundSeatNo }})
-                </ng-template>
-              </span>
-            </div>
+              <!-- ✅ Outbound Meal -->
+              <div class="flight-field" *ngIf="p.outboundMeal">
+                <span class="flight-label">
+                  Meal
+                  <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
+                </span>
+                <span class="flight-value">{{ p.outboundMeal | titlecase }}</span>
+              </div>
 
-            <!-- ✅ Return Seat -->
-            <div class="flight-field"
-                 *ngIf="tripType === 'round' && p.returnSeatNo">
-              <span class="flight-label">Seat (Return)</span>
-              <span class="flight-value">
-                <ng-container *ngIf="p.returnSeat; else returnAutoSeat">
-                  {{ p.returnSeat | titlecase }} ({{ p.returnSeatNo }})
-                </ng-container>
-                <ng-template #returnAutoSeat>
-                  *({{ p.returnSeatNo }})
-                </ng-template>
-              </span>
-            </div>
+              <!-- ✅ Return Meal -->
+              <div class="flight-field" *ngIf="tripType === 'round' && p.returnMeal">
+                <span class="flight-label">Meal (Return)</span>
+                <span class="flight-value">{{ p.returnMeal | titlecase }}</span>
+              </div>
 
-            <!-- ✅ Outbound Meal -->
-            <div class="flight-field" *ngIf="p.outboundMeal">
-              <span class="flight-label">
-                Meal
-                <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
-              </span>
-              <span class="flight-value">{{ p.outboundMeal | titlecase }}</span>
-            </div>
+              <!-- ✅ Outbound Baggage -->
+              <div class="flight-field" *ngIf="p.outboundBaggage">
+                <span class="flight-label">
+                  Baggage
+                  <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
+                </span>
+                <span class="flight-value">{{ p.outboundBaggage }}</span>
+              </div>
 
-            <!-- ✅ Return Meal -->
-            <div class="flight-field"
-                 *ngIf="tripType === 'round' && p.returnMeal">
-              <span class="flight-label">Meal (Return)</span>
-              <span class="flight-value">{{ p.returnMeal | titlecase }}</span>
-            </div>
+              <!-- ✅ Return Baggage -->
+              <div class="flight-field" *ngIf="tripType === 'round' && p.returnBaggage">
+                <span class="flight-label">Baggage (Return)</span>
+                <span class="flight-value">{{ p.returnBaggage }}</span>
+              </div>
 
-            <!-- ✅ Outbound Baggage -->
-            <div class="flight-field" *ngIf="p.outboundBaggage">
-              <span class="flight-label">
-                Baggage
-                <ng-container *ngIf="tripType === 'round'"> (Outbound)</ng-container>
-              </span>
-              <span class="flight-value">{{ p.outboundBaggage }}</span>
-            </div>
+              <!-- ✅ Insurance (Booking Level) -->
+              <div class="flight-field" *ngIf="bookingData?.insuranceSelected">
+                <span class="flight-label">Insurance</span>
+                <span class="flight-value">Covered</span>
+              </div>
 
-            <!-- ✅ Return Baggage -->
-            <div class="flight-field"
-                 *ngIf="tripType === 'round' && p.returnBaggage">
-              <span class="flight-label">Baggage (Return)</span>
-              <span class="flight-value">{{ p.returnBaggage }}</span>
-            </div>
+              <!-- ✅ Passenger Contact -->
+              <div class="flight-field" *ngIf="p.phone">
+                <span class="flight-label">Contact</span>
+                <span class="flight-value">{{ p.phone }}</span>
+              </div>
 
-            <!-- ✅ Insurance (Booking Level) -->
-            <div class="flight-field" *ngIf="bookingData?.insuranceSelected">
-              <span class="flight-label">Insurance</span>
-              <span class="flight-value">Covered</span>
+              <!-- ✅ Passenger Email -->
+              <div class="flight-field" *ngIf="p.email">
+                <span class="flight-label">Email</span>
+                <span class="flight-value">{{ p.email }}</span>
+              </div>
             </div>
-
-            <!-- ✅ Passenger Contact -->
-            <div class="flight-field" *ngIf="p.phone">
-              <span class="flight-label">Contact</span>
-              <span class="flight-value">{{ p.phone }}</span>
-            </div>
-
-            <!-- ✅ Passenger Email -->
-            <div class="flight-field" *ngIf="p.email">
-              <span class="flight-label">Email</span>
-              <span class="flight-value">{{ p.email }}</span>
-            </div>
-
-          </div>
-        </ng-container>
+          </details>
+        </div>
       </div>
  
     </div>

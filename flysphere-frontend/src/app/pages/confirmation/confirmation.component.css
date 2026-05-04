@@ -105,15 +105,69 @@
 /* Details layout */
 .confirmation-details {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: 1fr; /* flights + passengers take full width */
   gap: 24px;
 }
 
 /* Ticket cards container */
 .flight-tickets {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 16px;
+}
+
+/* Round-trip: show outbound + return side-by-side and occupy full available width */
+.flight-tickets.round-trip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  width: 100%;
+  gap: 16px;
+  padding: 0; /* ensure no inner padding shifts cards */
+  justify-items: stretch;
+}
+
+/* Hard rule: never allow a ticket-card to overlap its grid cell */
+.flight-tickets.round-trip .ticket-card {
+  transform: none !important;
+  left: auto !important;
+  right: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Prevent any accidental overlap between cards due to negative margins/shadows */
+.flight-tickets .ticket-card {
+  position: static; /* grid handles layout; avoids stacking contexts */
+}
+
+/* Ensure grid children can actually shrink instead of overflowing/cutting */
+.flight-tickets.round-trip > * {
+  min-width: 0;
+}
+
+/* Force the ticket layout to never overflow its own card */
+.ticket-card * {
+  box-sizing: border-box;
+}
+
+.ticket-airline-row,
+.ticket-header-row,
+.ticket-body-row,
+.ticket-baggage-row {
+  width: 100%;
+}
+
+.flight-tickets.round-trip .ticket-card {
+  width: 92%;
+  height: auto; /* let card expand naturally; prevents content getting cut */
+  background: #fff;
+  margin: 0;
+  overflow: hidden; /* keep the border radius clean and prevent visual overlap */
+}
+
+/* Remove any chance of a “middle strip” caused by border radius + shadows layering */
+.flight-tickets.round-trip .ticket-card {
+  box-shadow: 0 4px 16px rgba(15, 35, 95, 0.08);
 }
 
 /* Ticket card */
@@ -122,6 +176,9 @@
   border: 1px solid #dde3f1;
   box-shadow: 0 4px 16px rgba(15, 35, 95, 0.08);
   padding: 16px 18px 14px;
+  overflow: hidden; /* keep everything inside the card */
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Ticket header like “Outbound Tue, 14 Apr 2026” row */
@@ -179,27 +236,37 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
+  flex-wrap: wrap; /* allow content to move to next line instead of overflowing */
+  row-gap: 6px;
+  column-gap: 10px;
 }
 
 .ticket-airline-left {
   display: flex;
   align-items: baseline;
   gap: 6px;
+  min-width: 0;
 }
 
 .airline-name {
   font-weight: 600;
   color: #e65100;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .flight-no {
   font-size: 12px;
   color: #7a859d;
+  white-space: nowrap;
 }
 
 .ticket-airline-right .fare-class {
   font-size: 12px;
   color: #0f6efb;
+  white-space: nowrap;
 }
 
 /* Package / fare details row */
@@ -222,10 +289,24 @@
 /* Central time row with dotted vertical line */
 .ticket-body-row {
   display: grid;
-  grid-template-columns: 2.1fr 0.6fr 2.1fr;
+  grid-template-columns: 1fr auto 1fr; /* more flexible; prevents mid column forcing overflow */
   align-items: center;
   gap: 8px;
   padding: 8px 0 4px;
+  min-width: 0;
+}
+
+.time-col {
+  min-width: 0;
+}
+
+.ticket-airline-row {
+  gap: 10px;
+}
+
+.ticket-airline-right {
+  min-width: 0;
+  text-align: right;
 }
 
 .time-col {
@@ -301,7 +382,7 @@
   color: #64718a;
 }
 
-/* Passengers side-card */
+/* Passengers side-card (old layout) */
 .details-section {
   border-radius: 12px;
   border: 1px solid #dde3f1;
@@ -309,6 +390,51 @@
   align-self: flex-start;
   max-height: 100%;
   overflow: auto;
+}
+
+/* New passengers block (below flights, full width) */
+.passengers-section {
+  grid-column: 1 / -1;
+  margin-top: 16px;
+  border-radius: 12px;
+  border: 1px solid #dde3f1;
+  padding: 14px 16px;
+  background: #fff;
+}
+
+.passenger-details {
+  border-radius: 10px;
+  border: 1px solid #e3e7f0;
+  background: #f7f9ff;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.passenger-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  font-size: 13px;
+  color: #17233e;
+  font-weight: 600;
+}
+
+.passenger-summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary-meta {
+  font-size: 12px;
+  font-weight: 500;
+  color: #7a859d;
+  white-space: nowrap;
+}
+
+.passenger-details[open] .passenger-card {
+  margin-top: 10px;
 }
 
 .section-title {
