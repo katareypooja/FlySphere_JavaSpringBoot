@@ -4,6 +4,7 @@
   min-height: 100vh;
   padding: 24px 0 40px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden; /* prevent horizontal overflow without clipping card borders */
 }
 
 /* Single frame container */
@@ -14,6 +15,8 @@
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(15, 35, 95, 0.12);
   padding: 24px 28px 20px;
+  overflow: visible; /* keep full borders/shadows visible */
+  box-sizing: border-box;
 }
 
 /* Header */
@@ -107,6 +110,91 @@
   display: grid;
   grid-template-columns: 1fr; /* flights + passengers take full width */
   gap: 24px;
+  width: 100%;
+  min-width: 0; /* allow grid children to shrink; prevents right overflow */
+}
+
+/* ✅ Payment Summary (copied from Review page styles) */
+.price-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  border: 1px solid #e5e7eb;
+}
+
+/* Make Fare Breakdown look like Passengers section container */
+.price-card.fare-card {
+  border-radius: 12px;
+  border: 1px solid #dde3f1;
+  padding: 14px 16px;
+  box-shadow: none;
+  background: #fff;
+}
+
+.price-card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #17233e;
+}
+
+.price-card .row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #334155;
+}
+
+.price-card .grand {
+  /* Match normal row styling (no blue highlight) */
+  font-size: 14px;
+  font-weight: 400;
+  color: #334155;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Fare Breakdown dropdown */
+.fare-details {
+  border: 0;
+}
+
+.fare-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  width: 100%;
+  padding: 0;
+}
+
+.fare-summary::-webkit-details-marker {
+  display: none;
+}
+
+/* No arrow icon (same behavior as Passengers dropdown) */
+
+.fare-summary h3 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.fare-grand {
+  font-size: 13px;
+  font-weight: 600;
+  color: #17233e;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.fare-body {
+  margin-top: 12px;
 }
 
 /* Ticket cards container */
@@ -114,6 +202,8 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+  width: 100%;
+  min-width: 0;
 }
 
 /* Round-trip: show outbound + return side-by-side and occupy full available width */
@@ -158,7 +248,7 @@
 }
 
 .flight-tickets.round-trip .ticket-card {
-  width: 92%;
+  width: 100%;
   height: auto; /* let card expand naturally; prevents content getting cut */
   background: #fff;
   margin: 0;
@@ -179,6 +269,9 @@
   overflow: hidden; /* keep everything inside the card */
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box; /* include padding/border in width so it fits frame */
+  margin: 0;
+  display: block;
 }
 
 /* Ticket header like “Outbound Tue, 14 Apr 2026” row */
@@ -188,6 +281,7 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 8px;
+  flex-wrap: wrap; /* prevent right-side overflow on one-way */
 }
 
 .ticket-route {
@@ -208,9 +302,12 @@
 .ticket-meta-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   font-size: 12px;
   color: #7a859d;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 /* Seat type pill: Economy / Business / First */
@@ -405,7 +502,7 @@
 .passenger-details {
   border-radius: 10px;
   border: 1px solid #e3e7f0;
-  background: #f7f9ff;
+  background: #ffffff;
   padding: 10px 12px;
   margin-bottom: 10px;
 }
@@ -446,7 +543,7 @@
 
 .passenger-card {
   border-radius: 8px;
-  background: #f7f9ff;
+  background: #ffffff ;
   padding: 8px 10px;
   margin-bottom: 8px;
 }
