@@ -108,7 +108,7 @@
 /* Details layout */
 .confirmation-details {
   display: grid;
-  grid-template-columns: 1fr; /* flights + passengers take full width */
+  grid-template-columns: 2fr 1fr; /* passengers + fare side-by-side */
   gap: 24px;
   width: 100%;
   min-width: 0; /* allow grid children to shrink; prevents right overflow */
@@ -127,9 +127,10 @@
 .price-card.fare-card {
   border-radius: 12px;
   border: 1px solid #dde3f1;
-  padding: 14px 16px;
+  padding: 10px 12px; /* reduced inner space */
   box-shadow: none;
   background: #fff;
+  align-self: start; /* prevent stretching -> removes empty space */
 }
 
 .price-card h3 {
@@ -142,7 +143,7 @@
 .price-card .row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 6px; /* reduced */
   font-size: 14px;
   color: #334155;
 }
@@ -194,7 +195,7 @@
 }
 
 .fare-body {
-  margin-top: 12px;
+  margin-top: 8px; /* reduced */
 }
 
 /* Ticket cards container */
@@ -204,6 +205,7 @@
   gap: 16px;
   width: 100%;
   min-width: 0;
+  grid-column: 1 / -1; /* flights take full width above */
 }
 
 /* Round-trip: show outbound + return side-by-side and occupy full available width */
@@ -300,14 +302,7 @@
 
 /* right-aligned meta with seat pill */
 .ticket-meta-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  font-size: 12px;
-  color: #7a859d;
-  flex-wrap: wrap;
-  min-width: 0;
+  display: none; /* hide top-right date/non-stop meta as requested */
 }
 
 /* Seat type pill: Economy / Business / First */
@@ -410,6 +405,18 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  align-items: center; /* center airport under time */
+  text-align: center;
+}
+
+/* Place departure block to the left edge and arrival block to the right edge,
+   while keeping the inner stack centered (like the reference screenshot) */
+.ticket-body-row .time-col:first-child {
+  justify-self: start;
+}
+
+.ticket-body-row .time-col:last-child {
+  justify-self: end;
 }
 
 .time-main {
@@ -439,9 +446,8 @@
 /* vertical dotted line between origin & destination */
 .timeline-col {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
 }
 
 /* hide the circular bullets between times */
@@ -449,10 +455,17 @@
   display: none;
 }
 
+/* Replace vertical line with a horizontal arrow */
 .timeline-line {
-  flex: 1;
-  width: 0;
-  border-left: 1.5px dashed #b6c0d6;
+  display: none;
+}
+
+.timeline-col::before {
+  content: '→';
+  font-size: 50px; /* bigger arrow */
+  font-weight: 600;
+  color: #9aa6c0;
+  line-height: 1;
 }
 
 /* Baggage row */
@@ -491,12 +504,12 @@
 
 /* New passengers block (below flights, full width) */
 .passengers-section {
-  grid-column: 1 / -1;
-  margin-top: 16px;
+  margin-top: 0px;
   border-radius: 12px;
   border: 1px solid #dde3f1;
   padding: 14px 16px;
   background: #fff;
+  min-width: 0;
 }
 
 .passenger-details {
@@ -601,7 +614,7 @@
   }
 
   .confirmation-details {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* stack on mobile */
   }
 
   .confirmation-top-grid {
