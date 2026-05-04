@@ -144,7 +144,8 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
               View Details
             </button>
 
-            <button (click)="downloadTicket(booking.bookingId)"
+            <button *ngIf="booking.status === 'CONFIRMED'"
+                    (click)="downloadTicket(booking.bookingId)"
                     style="margin-left:10px;">
               Download Ticket
             </button>
@@ -653,28 +654,58 @@ export class MyBookingsComponent implements OnInit {
     this.router.navigate(['/confirmation', bookingId]);
   }
 
+  private toLocalDateTimeMs(dateStr: string, timeStr?: string | null): number {
+    // dateStr: "YYYY-MM-DD"
+    const [y, m, d] = dateStr.split('-').map((v) => parseInt(v, 10));
+
+    // If backend sends time => "HH:mm" or "HH:mm:ss"
+    // If time missing, use 23:59:59 so we don't close cancellation too early.
+    let hh = 23;
+    let mm = 59;
+    let ss = 59;
+
+    if (timeStr && timeStr.trim().length > 0) {
+      const parts = timeStr.split(':').map((v) => parseInt(v, 10));
+      hh = parts[0] ?? 0;
+      mm = parts[1] ?? 0;
+      ss = parts[2] ?? 0;
+    }
+
+    return new Date(y, (m ?? 1) - 1, d ?? 1, hh, mm, ss, 0).getTime();
+  }
+
   // ✅ Disable cancellation if flight departed or within 24 hours
   canCancel(booking: any): boolean {
-    if (!booking.departureDate) return false;
+    if (!booking?.departureDate) return false;
 
-    const now = new Date().getTime();
-    const departure = new Date(booking.departureDate).getTime();
-    const diffInMs = departure - now;
+    const now = Date.now();
+
+    // booking.departureTime is now returned by backend (BookingResponseDto)
+    // but keep safe fallback if older data doesn't have it.
+    const departureMs = this.toLocalDateTimeMs(
+      booking.departureDate,
+      booking.departureTime
+    );
+
+    const diffInMs = departureMs - now;
     const diffInHours = diffInMs / (1000 * 60 * 60);
 
-    if (diffInMs <= 0) return false;        // already departed
-    if (diffInHours <= 24) return false;    // within 24 hours
-
+    if (diffInMs <= 0) return false; // already departed
+    if (diffInHours <= 24) return false; // within 24 hours
     return true;
   }
 
   // ✅ Show different messages
   getCancellationMessage(booking: any): string {
-    if (!booking.departureDate) return '';
+    if (!booking?.departureDate) return '';
 
-    const now = new Date().getTime();
-    const departure = new Date(booking.departureDate).getTime();
-    const diffInMs = departure - now;
+    const now = Date.now();
+    const departureMs = this.toLocalDateTimeMs(
+      booking.departureDate,
+      booking.departureTime
+    );
+
+    const diffInMs = departureMs - now;
     const diffInHours = diffInMs / (1000 * 60 * 60);
 
     if (diffInMs <= 0) {

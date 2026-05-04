@@ -44,14 +44,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
+            // If the token is invalid/expired, do NOT set authentication.
+            // Spring Security will then reject protected endpoints.
             if (jwtUtil.validateToken(token)) {
                 String email = jwtUtil.extractEmail(token);
 
                 User user = userRepository.findByEmail(email).orElse(null);
 
                 if (user != null) {
-                    SimpleGrantedAuthority authority =
-                            new SimpleGrantedAuthority("ROLE_" + user.getRole());
+                    // user.getRole() might already contain "ROLE_" depending on DB seed.
+                    // Normalize to Spring's standard "ROLE_X" format to avoid mismatches.
+                    String role = user.getRole() != null ? user.getRole().trim() : "";
+                    if (!role.startsWith("ROLE_")) {
+                        role = "ROLE_" + role;
+                    }
+
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(

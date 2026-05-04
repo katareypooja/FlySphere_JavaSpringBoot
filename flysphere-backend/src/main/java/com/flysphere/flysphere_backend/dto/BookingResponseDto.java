@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Builder
@@ -21,10 +22,12 @@ public class BookingResponseDto {
     private String departureAirport;
     private String arrivalAirport;
     private java.time.LocalDate departureDate;
+    private LocalTime departureTime;
 
     private String returnDepartureAirport;
     private String returnArrivalAirport;
     private java.time.LocalDate returnDate;
+    private LocalTime returnDepartureTime;
 
     private int passengerCount;
 
