@@ -33,7 +33,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/bookings/my").authenticated()
                         .requestMatchers("/api/bookings/**").authenticated()
                         // Only admin list endpoint restricted
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings").hasAuthority("ADMIN")
+                        // NOTE: JwtAuthenticationFilter grants authorities like "ROLE_ADMIN",
+                        // so use hasRole("ADMIN") (which checks for "ROLE_ADMIN").
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/bookings").hasRole("ADMIN")
                         .requestMatchers("/api/tickets/**").authenticated()
                         .anyRequest().authenticated()
                 )

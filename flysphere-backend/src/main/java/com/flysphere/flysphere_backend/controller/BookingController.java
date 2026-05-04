@@ -48,12 +48,14 @@ public class BookingController {
             String returnDeparture = null;
             String returnArrival = null;
             java.time.LocalDate returnDate = null;
+            java.time.LocalTime returnDepartureTime = null;
 
             if (segments.size() > 1) {
                 var returnSeg = segments.get(1);
                 returnDeparture = returnSeg.getDepartureAirport();
                 returnArrival = returnSeg.getArrivalAirport();
                 returnDate = returnSeg.getDepartureDate();
+                returnDepartureTime = returnSeg.getDepartureTime();
             }
 
             return com.flysphere.flysphere_backend.dto.BookingResponseDto.builder()
@@ -66,10 +68,12 @@ public class BookingController {
                     .departureAirport(outbound.getDepartureAirport())
                     .arrivalAirport(outbound.getArrivalAirport())
                     .departureDate(outbound.getDepartureDate())
+                    .departureTime(outbound.getDepartureTime())
 
                     .returnDepartureAirport(returnDeparture)
                     .returnArrivalAirport(returnArrival)
                     .returnDate(returnDate)
+                    .returnDepartureTime(returnDepartureTime)
 
                     .tripType(booking.getTripType())
                     .cabinClass(

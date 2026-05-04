@@ -335,49 +335,46 @@ public class BookingService {
         }
 
         // ✅ Upcoming / Past filter (before pagination)
-        // Compare using full departure datetime (departureDate + departureTime).
-        // Your Flight entity stores:
-        //   departureDate: LocalDate
-        //   departureTime: LocalTime
-        // so we should NOT compare departureDate with LocalDateTime.
+        // PostgreSQL doesn't support `timestamp(date, time)` like the SQL that Hibernate generates here,
+        // so avoid building a datetime function call.
+        //
+        // Logic:
+        // - UPCOMING: departureDate > today OR (departureDate == today AND departureTime > nowTime)
+        // - PAST:     departureDate < today OR (departureDate == today AND departureTime <= nowTime)
+        //
+        // If departureTime is NULL, treat it as 00:00 (MIDNIGHT).
         if (type != null && !type.isBlank()) {
 
-            LocalDateTime now = LocalDateTime.now();
+            LocalDate today = LocalDate.now();
+            LocalTime nowTime = LocalTime.now();
 
             if ("UPCOMING".equalsIgnoreCase(type)) {
                 spec = spec.and((root, query, cb) -> {
-                    var flight = root.get("flight");
-                    var depDate = flight.get("departureDate");   // LocalDate
-                    var depTime = flight.get("departureTime");   // LocalTime (nullable)
-                    var safeTime = cb.coalesce(depTime, LocalTime.MIDNIGHT);
+                    jakarta.persistence.criteria.Path<LocalDate> depDate =
+                            root.get("flight").get("departureDate");
+                    jakarta.persistence.criteria.Expression<LocalTime> depTime =
+                            cb.coalesce(root.get("flight").get("departureTime"), LocalTime.MIDNIGHT);
 
-                    // Build comparable datetime using SQL TIMESTAMP(date, time)
-                    var depDateTime = cb.function(
-                            "timestamp",
-                            LocalDateTime.class,
-                            depDate,
-                            safeTime
-                    );
+                    jakarta.persistence.criteria.Predicate depAfterToday = cb.greaterThan(depDate, today);
+                    jakarta.persistence.criteria.Predicate depToday = cb.equal(depDate, today);
+                    jakarta.persistence.criteria.Predicate timeAfterNow = cb.greaterThan(depTime, nowTime);
 
-                    return cb.greaterThan(depDateTime, now);
+                    return cb.or(depAfterToday, cb.and(depToday, timeAfterNow));
                 });
             }
 
             if ("PAST".equalsIgnoreCase(type)) {
                 spec = spec.and((root, query, cb) -> {
-                    var flight = root.get("flight");
-                    var depDate = flight.get("departureDate");
-                    var depTime = flight.get("departureTime");
-                    var safeTime = cb.coalesce(depTime, LocalTime.MIDNIGHT);
+                    jakarta.persistence.criteria.Path<LocalDate> depDate =
+                            root.get("flight").get("departureDate");
+                    jakarta.persistence.criteria.Expression<LocalTime> depTime =
+                            cb.coalesce(root.get("flight").get("departureTime"), LocalTime.MIDNIGHT);
 
-                    var depDateTime = cb.function(
-                            "timestamp",
-                            LocalDateTime.class,
-                            depDate,
-                            safeTime
-                    );
+                    jakarta.persistence.criteria.Predicate depBeforeToday = cb.lessThan(depDate, today);
+                    jakarta.persistence.criteria.Predicate depToday = cb.equal(depDate, today);
+                    jakarta.persistence.criteria.Predicate timeBeforeOrEqualNow = cb.lessThanOrEqualTo(depTime, nowTime);
 
-                    return cb.lessThanOrEqualTo(depDateTime, now);
+                    return cb.or(depBeforeToday, cb.and(depToday, timeBeforeOrEqualNow));
                 });
             }
         }
