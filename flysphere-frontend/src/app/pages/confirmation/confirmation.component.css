@@ -108,7 +108,7 @@
 /* Details layout */
 .confirmation-details {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* passengers + fare side-by-side */
+  grid-template-columns: 2fr 1fr; /* passengers + right column */
   gap: 24px;
   width: 100%;
   min-width: 0; /* allow grid children to shrink; prevents right overflow */
@@ -136,7 +136,7 @@
 .price-card h3 {
   margin: 0 0 10px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 625;
   color: #17233e;
 }
 
@@ -146,6 +146,13 @@
   margin-bottom: 6px; /* reduced */
   font-size: 14px;
   color: #334155;
+}
+
+/* Ensure divider inside fare breakdown is visible */
+.price-card hr {
+  border: 0;
+  border-top: 1px solid #e3e7f0;
+  margin: 8px 0;
 }
 
 .price-card .grand {
@@ -176,6 +183,22 @@
 
 .fare-summary::-webkit-details-marker {
   display: none;
+}
+
+.fare-details > .fare-summary::after {
+  content: '▾';
+  color: #7a859d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.fare-details[open] > .fare-summary::after {
+  content: '▴';
+}
+
+.fare-summary:hover h3,
+.fare-summary:hover .fare-grand {
+  color: #0f6efb;
 }
 
 /* No arrow icon (same behavior as Passengers dropdown) */
@@ -536,6 +559,22 @@
   display: none;
 }
 
+.passenger-details > .passenger-summary::after {
+  content: '▾';
+  margin-left: auto;
+  color: #7a859d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.passenger-details[open] > .passenger-summary::after {
+  content: '▴';
+}
+
+.passenger-summary:hover {
+  color: #0f6efb;
+}
+
 .summary-meta {
   font-size: 12px;
   font-weight: 500;
@@ -548,8 +587,8 @@
 }
 
 .section-title {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 625;
+  font-size: 16px;
   margin-bottom: 10px;
   color: #17233e;
 }
@@ -577,7 +616,34 @@
   color: #17233e;
 }
 
-/* Bottom actions */
+/* Passengers + Fare Breakdown row */
+.passengers-fare-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* passengers left, fare right */
+  gap: 24px;
+  align-items: start;
+  margin-top: 0;
+}
+
+/* Divider line below row */
+.confirmation-divider {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: #e3e7f0;
+  margin: 10px 0 8px; /* reduced gap above/below line */
+}
+
+/* Download button below divider */
+.footer-download {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  margin-top: 4px; /* reduced space under divider */
+}
+
+/* Old bottom actions (kept for compatibility) */
 .confirmation-action {
   display: flex;
   justify-content: space-between;
@@ -615,6 +681,14 @@
 
   .confirmation-details {
     grid-template-columns: 1fr; /* stack on mobile */
+  }
+
+  .passengers-fare-row {
+    grid-template-columns: 1fr; /* stack passengers + fare on mobile */
+  }
+
+  .footer-download {
+    justify-content: flex-start;
   }
 
   .confirmation-top-grid {

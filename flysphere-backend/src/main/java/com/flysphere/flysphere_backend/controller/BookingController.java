@@ -50,13 +50,26 @@ public class BookingController {
             java.time.LocalDate returnDate = null;
             java.time.LocalTime returnDepartureTime = null;
 
+            String returnAirlineName = null;
+            String returnFlightType = null;
+
             if (segments.size() > 1) {
                 var returnSeg = segments.get(1);
                 returnDeparture = returnSeg.getDepartureAirport();
                 returnArrival = returnSeg.getArrivalAirport();
                 returnDate = returnSeg.getDepartureDate();
                 returnDepartureTime = returnSeg.getDepartureTime();
+                returnAirlineName = returnSeg.getAirlineName();
+                returnFlightType = returnSeg.getFlightType();
             }
+
+            var passengers = details.getPassengers().stream()
+                    .map(p -> com.flysphere.flysphere_backend.dto.BookingResponseDto.PassengerSummaryDto.builder()
+                            .firstName(p.getFirstName())
+                            .lastName(p.getLastName())
+                            .type(p.getType())
+                            .build())
+                    .toList();
 
             return com.flysphere.flysphere_backend.dto.BookingResponseDto.builder()
                     .bookingId(booking.getBookingId())
@@ -75,16 +88,18 @@ public class BookingController {
                     .returnDate(returnDate)
                     .returnDepartureTime(returnDepartureTime)
 
+                    .outboundAirlineName(outbound.getAirlineName())
+                    .outboundFlightType(outbound.getFlightType())
+                    .returnAirlineName(returnAirlineName)
+                    .returnFlightType(returnFlightType)
+
                     .tripType(booking.getTripType())
-                    .cabinClass(
-                        booking.getTripType() != null && booking.getTripType().equalsIgnoreCase("round")
-                            ? (booking.getOutboundCabinClass() != null
-                                ? booking.getOutboundCabinClass() + " - " + booking.getReturnCabinClass()
-                                : booking.getCabinClass())
-                            : booking.getCabinClass()
-                    )
+                    .cabinClass(booking.getCabinClass())
+                    .outboundCabinClass(booking.getOutboundCabinClass())
+                    .returnCabinClass(booking.getReturnCabinClass())
 
                     .passengerCount(details.getPassengers().size())
+                    .passengers(passengers)
                     .build();
         });
     }

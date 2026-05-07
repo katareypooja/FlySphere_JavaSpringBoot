@@ -15,6 +15,12 @@ public class BookingDetailsResponseDto {
     private Double totalAmount;
     private String status;
 
+    // ✅ Fare breakup for Fare Breakdown UI
+    private Double baseTotal;
+    private Double addonsTotal;
+    private Double taxAmount;
+    private Double convenienceFee;
+
     // ✅ Trip & Cabin Class Support
     private String tripType;
     private String cabinClass;
