@@ -151,82 +151,66 @@
             </div>
 
             <!-- ✅ CLEAN ADD‑ONS SECTION -->
-            <div style="font-weight:600; margin-top:10px;">Add‑Ons</div>
+            
 
-            <!-- ✅ Seat Total -->
-            <div class="row"
-                 *ngIf="(getSeatPrice(p.seatPreference?.outbound) 
-                         + (bookingData?.tripType === 'round' ? getSeatPrice(p.seatPreference?.return) : 0)) > 0">
+            <!-- ✅ OUTBOUND ADD-ONS -->
+            <div style="font-weight:600; margin-top:8px; font-size:13px;">Outbound Add‑Ons</div>
+
+            <div class="row" *ngIf="getSeatPrice(p.seatPreference?.outbound) > 0">
               <span>Seat</span>
-              <span>
-                ₹ {{
-                  getSeatPrice(p.seatPreference?.outbound)
-                  + (bookingData?.tripType === 'round'
-                      ? getSeatPrice(p.seatPreference?.return)
-                      : 0)
-                }}
-              </span>
+              <span>₹ {{ getSeatPrice(p.seatPreference?.outbound) }}</span>
             </div>
 
-            <!-- ✅ Meal Total -->
-            <div class="row"
-                 *ngIf="(getMealPrice(p.mealPreference?.outbound) 
-                         + (bookingData?.tripType === 'round' ? getMealPrice(p.mealPreference?.return) : 0)) > 0">
+            <div class="row" *ngIf="getMealPrice(p.mealPreference?.outbound) > 0">
               <span>Meal</span>
-              <span>
-                ₹ {{
-                  getMealPrice(p.mealPreference?.outbound)
-                  + (bookingData?.tripType === 'round'
-                      ? getMealPrice(p.mealPreference?.return)
-                      : 0)
-                }}
-              </span>
+              <span>₹ {{ getMealPrice(p.mealPreference?.outbound) }}</span>
             </div>
 
-            <!-- ✅ Baggage Total -->
-            <div class="row"
-                 *ngIf="((p.baggage?.outbound ? baggagePrice : 0)
-                         + (bookingData?.tripType === 'round' && p.baggage?.return ? baggagePrice : 0)) > 0">
+            <div class="row" *ngIf="p.baggage?.outbound">
               <span>Baggage</span>
-              <span>
-                ₹ {{
-                  (p.baggage?.outbound ? baggagePrice : 0)
-                  + (bookingData?.tripType === 'round' && p.baggage?.return ? baggagePrice : 0)
-                }}
-              </span>
+              <span>₹ {{ baggagePrice }}</span>
             </div>
 
-            <!-- ✅ Common insurance share per passenger -->
-            <div class="row"
-                 *ngIf="travelInsurance">
-              <span>Travel Protection</span>
-              <span>
+            <div class="row" *ngIf="getPassengerOutboundAddons(p) === 0">
+              <span style="color:#6b7280;">None selected</span>
+              <span>₹ 0</span>
+            </div>
+
+            <!-- ✅ RETURN ADD-ONS (ROUND TRIP ONLY) -->
+            <ng-container *ngIf="bookingData?.tripType === 'round'">
+              <div style="font-weight:600; margin-top:10px; font-size:13px;">Return Add‑Ons</div>
+
+              <div class="row" *ngIf="getSeatPrice(p.seatPreference?.return) > 0">
+                <span>Seat</span>
+                <span>₹ {{ getSeatPrice(p.seatPreference?.return) }}</span>
+              </div>
+
+              <div class="row" *ngIf="getMealPrice(p.mealPreference?.return) > 0">
+                <span>Meal</span>
+                <span>₹ {{ getMealPrice(p.mealPreference?.return) }}</span>
+              </div>
+
+              <div class="row" *ngIf="p.baggage?.return">
+                <span>Baggage</span>
+                <span>₹ {{ baggagePrice }}</span>
+              </div>
+
+              <div class="row" *ngIf="getPassengerReturnAddons(p) === 0">
+                <span style="color:#6b7280;">None selected</span>
+                <span>₹ 0</span>
+              </div>
+            </ng-container>
+
+            <!-- ✅ Common insurance per passenger (NOT per leg) -->
+            <div class="row" *ngIf="travelInsurance">
+              <span style="font-weight:600; color: #1A1B1F;">Travel Protection</span>
+              <span style="font-weight:600;">
                 ₹ {{
                   bookingData?.tripType === 'round'
                     ? insuranceComboPrice
                     : insurancePrice
                 }}
               </span>
-            </div>
-
-            <!-- ✅ If No Add‑Ons Selected (including common insurance) -->
-            <div class="row"
-                 *ngIf="
-                   (getSeatPrice(p.seatPreference?.outbound)
-                     + (bookingData?.tripType === 'round' ? getSeatPrice(p.seatPreference?.return) : 0)
-                     + getMealPrice(p.mealPreference?.outbound)
-                     + (bookingData?.tripType === 'round' ? getMealPrice(p.mealPreference?.return) : 0)
-                     + (p.baggage?.outbound ? baggagePrice : 0)
-                     + (bookingData?.tripType === 'round' && p.baggage?.return ? baggagePrice : 0)
-                     + (travelInsurance
-                         ? (bookingData?.tripType === 'round'
-                             ? insuranceComboPrice
-                             : insurancePrice)
-                         : 0)
-                   ) === 0
-                 ">
-              <span style="color:#6b7280;">None selected</span>
-              <span>₹ 0</span>
             </div>
 
             <div class="row subtotal">

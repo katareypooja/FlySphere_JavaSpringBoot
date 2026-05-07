@@ -215,5 +215,47 @@ export class ConfirmationComponent implements OnInit {
     });
   }
 
+  /* ================= FORMATTERS FOR PASSENGER DROPDOWN ================= */
+
+  formatSeat(seatType: any, seatNo: any): string {
+    const no = seatNo ? String(seatNo) : '';
+    const type = seatType ? String(seatType) : '';
+
+    if (!type && !no) return '—';
+    if (!type && no) return `*(${no})`;
+
+    return no ? `${this.titleCase(type)} (${no})` : this.titleCase(type);
+  }
+
+  formatMeal(meal: any): string {
+    if (!meal) return 'No Meal';
+    return this.titleCase(String(meal));
+  }
+
+  formatBaggage(b: any): string {
+    if (!b) return 'No';
+    // In some responses this could already be "Yes" or "Yes (10kgs)" or a string.
+    const val = String(b);
+    if (val.toLowerCase() === 'true') return 'Yes (10 kgs)';
+    if (val.toLowerCase() === 'yes') return 'Yes (10 kgs)';
+    return this.titleCase(val);
+  }
+
+  getOutboundAddonSummary(p: any): string {
+    return `${this.formatSeat(p?.outboundSeat, p?.outboundSeatNo)} / ${this.formatMeal(p?.outboundMeal)} / ${this.formatBaggage(p?.outboundBaggage)}`;
+  }
+
+  getReturnAddonSummary(p: any): string {
+    return `${this.formatSeat(p?.returnSeat, p?.returnSeatNo)} / ${this.formatMeal(p?.returnMeal)} / ${this.formatBaggage(p?.returnBaggage)}`;
+  }
+
+  private titleCase(input: string): string {
+    if (!input) return input;
+    return input
+      .split(' ')
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w))
+      .join(' ');
+  }
+
   goHome() { this.router.navigate(['/search']); }
 }
