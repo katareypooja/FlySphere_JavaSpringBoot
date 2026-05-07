@@ -513,10 +513,69 @@ public class BookingService {
                                 .build()
                 ).toList();
 
+        // ✅ Fare breakup calculation (keep consistent with frontend pricing constants)
+        int paxCount = passengers != null ? passengers.size() : 0;
+        boolean isRound = booking.getTripType() != null && booking.getTripType().equalsIgnoreCase("round");
+
+        int convenienceFee = paxCount > 0 ? 249 : 0;
+        int baggagePrice = 799;
+        int insuranceOneWay = 199;
+        int insuranceRoundTrip = 299;
+
+        java.util.function.Function<String, Integer> seatPrice = (pref) -> {
+            if (pref == null) return 0;
+            String p = pref.toLowerCase();
+            if (p.contains("middle")) return 299;
+            if (p.contains("aisle")) return 399;
+            if (p.contains("window")) return 499;
+            return 0;
+        };
+
+        java.util.function.Function<String, Integer> mealPrice = (pref) -> {
+            if (pref == null) return 0;
+            String p = pref.toLowerCase();
+            if (p.contains("veg")) return 199;
+            if (p.contains("jain")) return 249;
+            if (p.contains("nonveg")) return 299;
+            return 0;
+        };
+
+        int addonsTotal = 0;
+        for (Passenger p : passengers) {
+            addonsTotal += seatPrice.apply(p.getOutboundSeat());
+            addonsTotal += mealPrice.apply(p.getOutboundMeal());
+            if (p.getOutboundBaggage() != null && !p.getOutboundBaggage().isBlank()) addonsTotal += baggagePrice;
+
+            if (isRound) {
+                addonsTotal += seatPrice.apply(p.getReturnSeat());
+                addonsTotal += mealPrice.apply(p.getReturnMeal());
+                if (p.getReturnBaggage() != null && !p.getReturnBaggage().isBlank()) addonsTotal += baggagePrice;
+            }
+        }
+
+        if (Boolean.TRUE.equals(booking.getInsuranceSelected())) {
+            addonsTotal += (isRound ? insuranceRoundTrip : insuranceOneWay) * paxCount;
+        }
+
+        int grandTotal = booking.getTotalAmount() != null ? (int) Math.round(booking.getTotalAmount()) : 0;
+
+        // Solve tax/base similar to frontend (tax=round((base+addons)*0.12)) and convenienceFee after tax
+        int preTax = Math.max(0, grandTotal - convenienceFee);
+        int taxAmount = 0;
+        for (int i = 0; i < 3; i++) {
+            taxAmount = (int) Math.round(preTax * 0.12);
+            preTax = Math.max(0, grandTotal - convenienceFee - taxAmount);
+        }
+        int baseTotal = Math.max(0, preTax - addonsTotal);
+
         return com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.builder()
                 .bookingId(booking.getBookingId())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus())
+                .baseTotal((double) baseTotal)
+                .addonsTotal((double) addonsTotal)
+                .taxAmount((double) taxAmount)
+                .convenienceFee((double) convenienceFee)
                 .tripType(booking.getTripType())
                 .cabinClass(booking.getCabinClass())
                 .outboundCabinClass(booking.getOutboundCabinClass())

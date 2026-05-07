@@ -105,7 +105,7 @@
 
       <!-- DEPARTURE -->
       <div class="search-item date-item" (click)="openDatePicker()">
-        <div class="label">Departure</div>
+        <div class="label">Outbound</div>
 
         <div class="airline-date-display">
           <div class="date-top">
@@ -238,7 +238,7 @@
 <div
   *ngIf="tripType !== 'round' && searched && !isLoading && (!flights || flights.length === 0)"
   class="no-flights-message">
-  Currently No flights available.
+  Currently no flights available.
 </div>
 
 <!-- ✅ ROUND TRIP EMPTY STATES ARE SHOWN INSIDE EACH COLUMN (see below) -->
@@ -255,7 +255,7 @@
   </h2>
 
   <p class="round-subtitle">
-    Select your preferred departure flight below to continue booking.
+    Select your preferred outbound flight below to continue booking.
   </p>
 
   <div class="round-header-divider"></div>
@@ -277,7 +277,7 @@
   </h2>
 
   <p class="round-subtitle">
-    Select your preferred departure and return flights below to unlock the best value combinations.
+    Select your preferred outbound and return flights below to unlock the best value combinations.
   </p>
 
   <div class="round-header-divider"></div>
@@ -300,7 +300,7 @@
 
         <!-- ✅ Outbound empty message -->
         <div *ngIf="searched && !isLoading && (!flights || flights.length === 0)" class="no-flights-message">
-          Currently No flights available for departure: {{ fromCityName }} ({{ fromCityCode }}) → {{ toCityName }} ({{ toCityCode }}) on {{ departureDate }}.
+          Currently no flights available for outbound: {{ fromCityName }} ({{ fromCityCode }}) → {{ toCityName }} ({{ toCityCode }}) on {{ departureDate }}.
         </div>
 
         <div class="flight-card professional-card fade-in"
@@ -371,7 +371,7 @@
 
         <!-- ✅ Return empty message -->
         <div *ngIf="searched && !isLoading && (!returnFlights || returnFlights.length === 0)" class="no-flights-message">
-          Currently No flights available for return: {{ toCityName }} ({{ toCityCode }}) → {{ fromCityName }} ({{ fromCityCode }}) on {{ returnDate }}.
+          Currently no flights available for return: {{ toCityName }} ({{ toCityCode }}) → {{ fromCityName }} ({{ fromCityCode }}) on {{ returnDate }}.
         </div>
 
         <div class="flight-card professional-card fade-in"
@@ -545,7 +545,7 @@
 
           <div class="flight-row">
             <span class="flight-icon">✈</span>
-            <span class="flight-label">Departure</span>
+            <span class="flight-label">Outbound</span>
             <span class="flight-details">
               {{ selectedDeparture?.airline }} ({{ selectedDeparture?.code }})
               · {{ selectedDeparture?.departCity }} → {{ selectedDeparture?.arriveCity }}
@@ -569,7 +569,7 @@
         <div *ngIf="tripType !== 'round' && selectedFlight" class="modal-title flight-header-clean">
           <div class="flight-row">
             <span class="flight-icon">✈</span>
-            <span class="flight-label">Departure</span>
+            <span class="flight-label">Outbound</span>
             <span class="flight-details">
               {{ selectedFlight.airline }} ({{ selectedFlight.code }})
               · {{ selectedFlight.departCity }} → {{ selectedFlight.arriveCity }}
@@ -588,7 +588,7 @@
         <ng-container *ngIf="tripType === 'round'; else oneWayTemplate">
 
           <!-- ================= DEPARTURE FARES ================= -->
-          <h3 style="margin:20px 0;">Departure Fares</h3>
+          <h3 style="margin:20px 0;">Outbound Fares</h3>
 
           <div class="fare-grid">
 
@@ -774,7 +774,7 @@
         <!-- ✅ ONE WAY PREMIUM TEMPLATE (Now Same As Round Trip) -->
         <ng-template #oneWayTemplate>
 
-          <h3 style="margin:20px 0;">Departure Fares</h3>
+          <h3 style="margin:20px 0;">Outbound Fares</h3>
 
           <div class="fare-grid">
 

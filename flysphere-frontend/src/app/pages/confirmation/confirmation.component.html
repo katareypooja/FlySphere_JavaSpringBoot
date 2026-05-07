@@ -26,18 +26,6 @@
         </p>
       </div>
 
-      <!-- ✅ Download Button Moved To Top -->
-      <div style="margin-left:auto;">
-        <button class="download-btn"
-                (click)="downloadTicket()"
-                [disabled]="bookingData?.status === 'CANCELLED'"
-                [ngStyle]="{
-                  opacity: bookingData?.status === 'CANCELLED' ? 0.5 : 1,
-                  cursor: bookingData?.status === 'CANCELLED' ? 'not-allowed' : 'pointer'
-                }">
-          Download E‑Ticket (PDF)
-        </button>
-      </div>
     </div>
  
     <!-- ✅ SUMMARY ROW -->
@@ -277,107 +265,124 @@
 
       </div>
 
-      <!-- ✅ Passengers (moved below flights, full width) -->
-      <div class="passengers-section" *ngIf="passengers.length">
-        <div class="section-title">Passengers</div>
+      <!-- ✅ Passengers + Fare Breakdown side-by-side -->
+      <div class="passengers-fare-row">
+        <div class="passengers-section" *ngIf="passengers.length">
+          <div class="section-title">Passengers</div>
 
-        <div class="passenger-accordion" *ngFor="let p of passengers; let i = index">
-          <details class="passenger-details">
-            <summary class="passenger-summary">
-              <span class="summary-name">Passenger {{ i + 1 }}: {{ p.firstName }} {{ p.lastName }}</span>
-              <span class="summary-meta">
-                <ng-container *ngIf="p.age">Age: {{ p.age }}</ng-container>
-                <ng-container *ngIf="p.age">&nbsp;•&nbsp;</ng-container>
-                <span>Type: {{ p.type | titlecase }}</span>
-              </span>
+          <div class="passenger-accordion" *ngFor="let p of passengers; let i = index">
+            <details class="passenger-details">
+              <summary class="passenger-summary">
+                <span class="summary-name">Passenger {{ i + 1 }}: {{ p.firstName }} {{ p.lastName }}</span>
+                <span class="summary-meta">
+                  <ng-container *ngIf="p.age">Age: {{ p.age }}</ng-container>
+                  <ng-container *ngIf="p.age">&nbsp;•&nbsp;</ng-container>
+                  <span>Type: {{ p.type | titlecase }}</span>
+                </span>
+              </summary>
+
+              <div class="passenger-card">
+                <div class="flight-field" *ngIf="p.gender">
+                  <span class="flight-label">Gender</span>
+                  <span class="flight-value">{{ p.gender | titlecase }}</span>
+                </div>
+
+                <div class="flight-field" *ngIf="p.nationality">
+                  <span class="flight-label">Nationality</span>
+                  <span class="flight-value">{{ p.nationality }}</span>
+                </div>
+
+                <!-- ✅ Outbound summary -->
+                <div class="flight-field">
+                  <span class="flight-label">Outbound Seat/Meal/Baggage</span>
+                  <span class="flight-value">{{ getOutboundAddonSummary(p) }}</span>
+                </div>
+
+                <!-- ✅ Return summary -->
+                <div class="flight-field" *ngIf="tripType === 'round'">
+                  <span class="flight-label">Return Seat/Meal/Baggage</span>
+                  <span class="flight-value">{{ getReturnAddonSummary(p) }}</span>
+                </div>
+
+                <!-- ✅ Insurance (Booking Level) -->
+                <div class="flight-field">
+                  <span class="flight-label">Insurance</span>
+                  <span class="flight-value">
+                    {{ bookingData?.insuranceSelected ? 'Covered' : 'Not Covered' }}
+                  </span>
+                </div>
+
+                <!-- ✅ Passenger Contact -->
+                <div class="flight-field" *ngIf="p.phone">
+                  <span class="flight-label">Contact</span>
+                  <span class="flight-value">{{ p.phone }}</span>
+                </div>
+
+                <!-- ✅ Passenger Email -->
+                <div class="flight-field" *ngIf="p.email">
+                  <span class="flight-label">Email</span>
+                  <span class="flight-value">{{ p.email }}</span>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="price-card fare-card" *ngIf="totals">
+          <details class="fare-details">
+            <summary class="fare-summary">
+              <h3>Fare Breakdown</h3>
+              <span class="fare-grand">₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
             </summary>
 
-            <div class="passenger-card">
-              <div class="flight-field" *ngIf="p.gender">
-                <span class="flight-label">Gender</span>
-                <span class="flight-value">{{ p.gender | titlecase }}</span>
+            <div class="fare-body">
+              <div class="row">
+                <span>Base Fare</span>
+                <span>₹ {{ (totals?.baseTotal ?? 0) | number:'1.0-0' }}</span>
               </div>
 
-              <div class="flight-field" *ngIf="p.nationality">
-                <span class="flight-label">Nationality</span>
-                <span class="flight-value">{{ p.nationality }}</span>
+              <div class="row">
+                <span>Add-ons</span>
+                <span>₹ {{ (totals?.addonsTotal ?? 0) | number:'1.0-0' }}</span>
               </div>
 
-              <!-- ✅ Outbound summary -->
-              <div class="flight-field">
-                <span class="flight-label">Outbound Seat/Meal/Baggage</span>
-                <span class="flight-value">{{ getOutboundAddonSummary(p) }}</span>
+              <div class="row">
+                <span>Taxes</span>
+                <span>₹ {{ (totals?.taxAmount ?? 0) | number:'1.0-0' }}</span>
               </div>
 
-              <!-- ✅ Return summary -->
-              <div class="flight-field" *ngIf="tripType === 'round'">
-                <span class="flight-label">Return Seat/Meal/Baggage</span>
-                <span class="flight-value">{{ getReturnAddonSummary(p) }}</span>
+              <div class="row">
+                <span>Convenience Fee</span>
+                <span>₹ {{ (totals?.convenienceFee ?? 0) | number:'1.0-0' }}</span>
               </div>
 
-              <!-- ✅ Insurance (Booking Level) -->
-              <div class="flight-field">
-                <span class="flight-label">Insurance</span>
-                <span class="flight-value">
-                  {{ bookingData?.insuranceSelected ? 'Covered' : 'Not Covered' }}
-                </span>
-              </div>
+              <hr>
 
-              <!-- ✅ Passenger Contact -->
-              <div class="flight-field" *ngIf="p.phone">
-                <span class="flight-label">Contact</span>
-                <span class="flight-value">{{ p.phone }}</span>
-              </div>
-
-              <!-- ✅ Passenger Email -->
-              <div class="flight-field" *ngIf="p.email">
-                <span class="flight-label">Email</span>
-                <span class="flight-value">{{ p.email }}</span>
+              <div class="row grand">
+                <span>Total</span>
+                <span>₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
               </div>
             </div>
           </details>
         </div>
       </div>
 
-      <!-- ✅ Fare breakdown dropdown (moved below Passengers) -->
-      <div class="price-card fare-card" *ngIf="totals">
-        <details class="fare-details">
-          <summary class="fare-summary">
-            <h3>Fare Breakdown</h3>
-            <span class="fare-grand">₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
-          </summary>
+      <!-- ✅ Divider line below passengers row -->
+      <div class="confirmation-divider"></div>
 
-          <div class="fare-body">
-            <div class="row">
-              <span>Base Fare</span>
-              <span>₹ {{ (totals?.baseTotal ?? 0) | number:'1.0-0' }}</span>
-            </div>
-
-            <div class="row">
-              <span>Add-ons</span>
-              <span>₹ {{ (totals?.addonsTotal ?? 0) | number:'1.0-0' }}</span>
-            </div>
-
-            <div class="row">
-              <span>Taxes</span>
-              <span>₹ {{ (totals?.taxAmount ?? 0) | number:'1.0-0' }}</span>
-            </div>
-
-            <div class="row">
-              <span>Convenience Fee</span>
-              <span>₹ {{ (totals?.convenienceFee ?? 0) | number:'1.0-0' }}</span>
-            </div>
-
-            <hr>
-
-            <div class="row grand">
-              <span>Total</span>
-              <span>₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
-            </div>
-          </div>
-        </details>
+      <!-- ✅ Download button below the line -->
+      <div class="footer-download">
+        <button class="download-btn"
+                (click)="downloadTicket()"
+                [disabled]="bookingData?.status === 'CANCELLED'"
+                [ngStyle]="{
+                  opacity: bookingData?.status === 'CANCELLED' ? 0.5 : 1,
+                  cursor: bookingData?.status === 'CANCELLED' ? 'not-allowed' : 'pointer'
+                }">
+          Download E‑Ticket (PDF)
+        </button>
       </div>
- 
+
     </div>
  
  

@@ -74,11 +74,6 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
         </div>
 
         <div *ngFor="let booking of bookings; let i = index" class="booking-row">
-
-          <div class="booking-number">
-            {{ i + 1 }}
-          </div>
-
           <div class="booking-item">
 
           <!-- Header -->
@@ -92,67 +87,120 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
               </div>
             </div>
 
-            <div class="status-badge"
-                 [ngClass]="getStatusClass(booking.status)">
-              {{ booking.status }}
+            <div class="booking-header-right">
+              <div class="status-badge"
+                   [ngClass]="getStatusClass(booking.status)">
+                {{ booking.status }}
+              </div>
             </div>
           </div>
 
           <!-- Route Section -->
           <div class="route-section">
-            <div class="route-text" *ngIf="!booking.returnDepartureAirport">
-              {{ booking.departureAirport }} → {{ booking.arrivalAirport }}
+            <!-- One-way -->
+            <div *ngIf="!booking.returnDepartureAirport" class="route-block">
+              <div class="flight-meta">
+                {{ booking.outboundAirlineName || 'Airline' }} • {{ booking.outboundFlightType || 'Flight' }}
+              </div>
+              <div class="route-text">
+                {{ booking.departureAirport }} → {{ booking.arrivalAirport }}
+              </div>
+              <div class="trip-date">
+                {{ booking.departureDate | date:'dd MMM yyyy' }} • {{ booking.departureTime || '—' }}
+              </div>
             </div>
 
-            <div class="route-text route-split" *ngIf="booking.returnDepartureAirport">
-              <span>{{ booking.departureAirport }} → {{ booking.arrivalAirport }}</span>
+            <!-- Round-trip -->
+            <div *ngIf="booking.returnDepartureAirport" class="route-split">
+              <div class="route-block">
+                <div class="flight-meta">
+                  {{ booking.outboundAirlineName || 'Airline' }} • {{ booking.outboundFlightType || 'Flight' }}
+                </div>
+                <div class="route-text">
+                  {{ booking.departureAirport }} → {{ booking.arrivalAirport }}
+                </div>
+                <div class="trip-date">
+                  {{ booking.departureDate | date:'dd MMM yyyy' }} • {{ booking.departureTime || '—' }}
+                </div>
+              </div>
+
               <span class="route-line"></span>
-              <span>{{ booking.returnDepartureAirport }} → {{ booking.returnArrivalAirport }}</span>
-            </div>
 
-            <!-- ✅ Date Layout -->
-            <div class="trip-date" *ngIf="!booking.returnDate">
-              {{ getTripDateDisplay(booking) }}
-            </div>
-
-            <div class="trip-date route-split" *ngIf="booking.returnDate">
-              <span>
-                {{ booking.departureDate | date:'dd MMM yyyy' }}
-              </span>
-              <span>
-                {{ booking.returnDate | date:'dd MMM yyyy' }}
-              </span>
+              <div class="route-block route-block-right">
+                <div class="flight-meta">
+                  {{ booking.returnAirlineName || 'Airline' }} • {{ booking.returnFlightType || 'Flight' }}
+                </div>
+                <div class="route-text">
+                  {{ booking.returnDepartureAirport }} → {{ booking.returnArrivalAirport }}
+                </div>
+                <div class="trip-date">
+                  {{ booking.returnDate | date:'dd MMM yyyy' }} • {{ booking.returnDepartureTime || '—' }}
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Booking Body -->
-          <div class="booking-body">
-            <div>
-              <strong>Trip:</strong>
-              {{ booking.tripType ? (booking.tripType | titlecase) : 'One Way' }}
+          <!-- Facts + Passengers -->
+          <div class="facts-row">
+            <div class="cabin-col">
+              <div class="fact" *ngIf="!booking.returnDepartureAirport">
+                <span class="fact-label">Cabin</span>
+                <span class="badge-pill">
+                  {{ booking.cabinClass ? booking.cabinClass : 'Economy' }}
+                </span>
+              </div>
+
+              <!-- ✅ Round trip cabin inline at left -->
+              <div class="fact fact-round-cabin-inline" *ngIf="booking.returnDepartureAirport">
+                <span class="fact-label">Cabin</span>
+                <span class="badge-pill">
+                  Outbound: {{ booking.outboundCabinClass || booking.cabinClass || 'Economy' }}
+                </span>
+                <span class="badge-pill">
+                  Return: {{ booking.returnCabinClass || booking.cabinClass || 'Economy' }}
+                </span>
+              </div>
             </div>
-            <div>
-              <strong>Cabin:</strong>
-              {{ booking.cabinClass ? booking.cabinClass : 'Economy' }}
-            </div>
-            <div><strong>Total:</strong> ₹ {{ booking.totalAmount }}</div>
+
+            <details class="passenger-details passenger-details-compact">
+              <summary class="passenger-summary">
+                <span class="passenger-title">Passengers</span>
+                <span class="passenger-count">({{ booking.passengerCount ?? (booking.passengers?.length ?? 0) }})</span>
+                <span class="summary-meta">View</span>
+              </summary>
+
+              <div class="passenger-list" *ngIf="booking.passengers?.length; else noPassengers">
+                <div class="passenger-pill" *ngFor="let p of booking.passengers">
+                  <span class="passenger-name">{{ p.firstName }} {{ p.lastName }}</span>
+                  <span class="pill-type">({{ p.type | titlecase }})</span>
+                </div>
+              </div>
+
+              <ng-template #noPassengers>
+                <div class="passenger-empty">Passenger details not available.</div>
+              </ng-template>
+            </details>
           </div>
 
           <!-- Footer -->
           <div class="booking-footer">
-            <button (click)="viewDetails(booking.bookingId)">
+            <div class="footer-total-text">
+              <span class="footer-total-label">Total:</span>
+              <span class="footer-total-value">₹ {{ booking.totalAmount }}</span>
+            </div>
+
+            <button class="btn btn-outline" (click)="viewDetails(booking.bookingId)">
               View Details
             </button>
 
-            <button *ngIf="booking.status === 'CONFIRMED'"
-                    (click)="downloadTicket(booking.bookingId)"
-                    style="margin-left:10px;">
+            <button class="btn btn-outline" *ngIf="booking.status === 'CONFIRMED'"
+                    (click)="downloadTicket(booking.bookingId)">
               Download Ticket
             </button>
 
-            <button *ngIf="booking.status === 'CONFIRMED'"
+            <button class="btn btn-danger" *ngIf="booking.status === 'CONFIRMED'"
                     (click)="handleCancellationClick(booking)"
-                    class="cancel-btn">
+                    [disabled]="!canCancel(booking)">
               {{ canCancel(booking) ? 'Cancel Booking' : 'Cancellation Closed' }}
             </button>
           </div>
@@ -215,7 +263,7 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
 
     .filters {
       display: flex;
-      gap: 12px;
+      gap: 6px; /* remove extra spacing between Search, Status, Reset */
       align-items: center;
     }
 
@@ -234,6 +282,7 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       padding: 0 12px;
       border: none;
       outline: none;
+      margin: 0 !important; /* remove any default/user-agent margin seen in inspect */
     }
 
     .filters select {
@@ -243,7 +292,7 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     }
 
     .filters button {
-      padding: 0 16px;
+      padding: 0 10px; /* tighter reset button */
       border: none;
       cursor: pointer;
       font-weight: 600;
@@ -376,14 +425,6 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       gap: 15px;
     }
 
-    .booking-number {
-      font-size: 22px;
-      font-weight: 700;
-      color: white;
-      width: 35px;
-      text-align: center;
-    }
-
     .booking-item {
       flex: 1;
       background: #ffffff;
@@ -397,9 +438,17 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     .booking-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      gap: 14px;
       margin-bottom: 12px;
     }
+
+    .booking-header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
 
     .booking-id {
       font-weight: 600;
@@ -441,18 +490,35 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       border-radius: 12px;
     }
 
+    .route-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .flight-meta {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+    }
+
     .route-text {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
-      color: #1f2937;
+      color: #1a1b1f;
     }
 
     /* ✅ Side-by-side round trip layout */
     .route-split {
       display: flex;
       align-items: center;
-      justify-content: space-between; /* ✅ push right item fully right */
+      justify-content: space-between;
       width: 100%;
+      gap: 12px;
+    }
+
+    .route-block-right {
+      text-align: right;
     }
 
     /* ✅ Middle line for round trip */
@@ -461,46 +527,226 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       height: 2px;
       background: #e5e7eb;
       border-radius: 2px;
-      margin: 0 12px; /* ✅ spacing between routes */
+      margin: 0 6px;
     }
 
     .trip-date {
       font-size: 14px;
       color: #4b5563;
-      margin-top: 4px;
+      margin-top: 0;
     }
 
-    /* ✅ Ensure return date fully right-aligned */
-    .trip-date.route-split span:last-child {
+    .facts-row {
+      margin-top: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+    }
+
+    .cabin-col {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .fact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #334155;
+      flex-wrap: wrap;
+    }
+
+    .fact-round-cabin-inline {
+      gap: 10px;
+    }
+
+    .fact-label {
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    /* Make the values inside the highlighted Cabin/Passengers box use the same gray */
+    .badge-pill,
+    .passenger-summary,
+    .summary-meta,
+    .passenger-pill,
+    .pill-type,
+    .passenger-title,
+    .passenger-count,
+    .passenger-name {
+      color: #64748b !important;
+    }
+
+    .badge-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #f8fafc;
+      color: #0f172a; /* black like Cabin label */
+      font-weight: 700;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .passenger-details {
+      border: 0;
+      min-width: 320px;
+      flex: 1;
+    }
+
+    .passenger-details-compact {
+      flex: 0 0 auto;
+      min-width: 220px;
+      max-width: 340px;
       margin-left: auto;
-      text-align: right;
     }
 
-    .booking-body {
+    .passenger-summary {
+      cursor: pointer;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      list-style: none;
+      font-size: 13px;
+      color: #0f172a; /* same as Cabin text */
+      font-weight: 700;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .passenger-title {
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .passenger-count {
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .passenger-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-meta {
+      margin-left: auto; /* push View to right inside pill */
+      font-size: 11px;   /* small view */
+      font-weight: 700;
+      color: #0f172a;    /* same as Cabin */
+      white-space: nowrap;
+      opacity: 0.8;
+    }
+
+    .passenger-list {
       margin-top: 10px;
-      font-size: 14px;
-      color: #374151;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .passenger-pill {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a; /* same as Cabin */
+      display: inline-flex;
+      gap: 6px;
+      align-items: baseline;
+    }
+
+    .passenger-name {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .pill-type {
+      font-weight: 700;
+      color: #0f172a; /* same as Cabin */
+      opacity: 0.7;
+    }
+
+    .passenger-empty {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #64748b;
+      padding: 8px 2px 0;
     }
 
     .booking-footer {
-      margin-top: 18px;
-      text-align: right;
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
     }
 
-    .booking-footer button {
+    .footer-total-text {
+      margin-right: auto;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .footer-total-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .footer-total-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1b1f;
+      white-space: nowrap;
+    }
+
+    .btn {
       padding: 8px 18px;
       border-radius: 999px;
-      border: 1px solid #3b82f6;
-      background: transparent;
-      color: #3b82f6;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
+      border: 1px solid transparent;
+      transition: 0.2s ease;
+      font-size: 13px;
     }
 
-    .cancel-btn {
-      margin-left: 10px;
-      border-color: #dc2626;
+
+    .btn-outline {
+      background: transparent;
+      color: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .btn-outline:hover {
+      background: rgba(37, 99, 235, 0.08);
+    }
+
+
+    .btn-danger {
+      background: transparent;
       color: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(220, 38, 38, 0.08);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     .pagination {
