@@ -248,6 +248,30 @@ export class BookingComponent implements OnInit, AfterViewInit {
     return 0;
   }
 
+  /* ================= PER-LEG ADDONS (FOR UI BREAKDOWN) ================= */
+
+  getPassengerOutboundAddons(p: any): number {
+    let addons = 0;
+
+    addons += this.getSeatPrice(p.seatPreference?.outbound);
+    addons += this.getMealPrice(p.mealPreference?.outbound);
+    if (p.baggage?.outbound) addons += this.baggagePrice;
+
+    return Math.round(addons);
+  }
+
+  getPassengerReturnAddons(p: any): number {
+    if (this.bookingData?.tripType !== 'round') return 0;
+
+    let addons = 0;
+
+    addons += this.getSeatPrice(p.seatPreference?.return);
+    addons += this.getMealPrice(p.mealPreference?.return);
+    if (p.baggage?.return) addons += this.baggagePrice;
+
+    return Math.round(addons);
+  }
+
   get addonsTotal(): number {
     let total = 0;
 
