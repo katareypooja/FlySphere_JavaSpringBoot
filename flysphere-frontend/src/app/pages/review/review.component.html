@@ -132,7 +132,7 @@
       <div *ngFor="let p of passengers" class="passenger-summary premium-passenger">
         <div class="passenger-top">
           <div class="passenger-name">
-            {{ p.firstName }} {{ p.lastName }}
+            {{ p.title ? (p.title | titlecase) + ' ' : '' }}{{ p.firstName }} {{ p.lastName }}
           </div>
           <div class="passenger-meta">
             {{ p.type | titlecase }} • Age {{ p.age }}
@@ -141,86 +141,119 @@
 
         <div class="addons premium-addons">
 
-          <!-- ✅ ONE WAY PREFERENCES -->
+          <!-- ✅ ONE WAY PREFERENCES (Outbound only) -->
           <ng-container *ngIf="bookingData?.tripType !== 'round'; else roundPrefs">
 
-            <span class="addon-badge">
-              💺 Seat:
-              {{
-                p.seatPreference?.outbound
-                  ? (p.seatPreference.outbound | titlecase)
-                  : 'As per availability'
-              }}
-            </span>
+            <div class="prefs-groups">
+              <div class="prefs-group">
+                <div class="prefs-title">Outbound</div>
 
-            <span class="addon-badge"
-                  *ngIf="p.mealPreference?.outbound">
-              🍽 Meal:
-              {{ p.mealPreference.outbound | titlecase }}
-            </span>
+                <div class="prefs-badges">
+                  <span class="addon-badge">
+                    💺 Seat:
+                    {{
+                      p.seatPreference?.outbound
+                        ? (p.seatPreference.outbound | titlecase)
+                        : 'As per availability'
+                    }}
+                  </span>
 
-            <span class="addon-badge"
-                  *ngIf="p.baggage?.outbound">
-              🧳 Baggage:
-              +10kg Added
-            </span>
+                  <span class="addon-badge">
+                    🍽 Meal:
+                    {{
+                      p.mealPreference?.outbound
+                        ? (p.mealPreference.outbound | titlecase)
+                        : 'No meal selected'
+                    }}
+                  </span>
 
-            <span class="addon-badge"
-                  *ngIf="bookingData?.insuranceSelected">
-              🛡 Insurance: Added
-            </span>
+                  <span class="addon-badge">
+                    🧳 Baggage:
+                    {{ p.baggage?.outbound ? '+10kg Added' : 'No baggage selected' }}
+                  </span>
+
+                  <span class="addon-badge">
+                    🛡 Insurance:
+                    {{ bookingData?.insuranceSelected ? 'Added' : 'Not Added' }}
+                  </span>
+                </div>
+              </div>
+            </div>
 
           </ng-container>
 
           <!-- ✅ ROUND TRIP PREFERENCES -->
           <ng-template #roundPrefs>
 
-            <span class="addon-badge">
-              💺 Seat (Outbound):
-              {{
-                p.seatPreference?.outbound
-                  ? (p.seatPreference.outbound | titlecase)
-                  : 'As per availability'
-              }}
-            </span>
+            <div class="prefs-groups">
+              <div class="prefs-group">
+                <div class="prefs-title">Outbound</div>
 
-            <span class="addon-badge">
-              💺 Seat (Return):
-              {{
-                p.seatPreference?.return
-                  ? (p.seatPreference.return | titlecase)
-                  : 'As per availability'
-              }}
-            </span>
+                <div class="prefs-badges">
+                  <span class="addon-badge">
+                    💺 Seat:
+                    {{
+                      p.seatPreference?.outbound
+                        ? (p.seatPreference.outbound | titlecase)
+                        : 'As per availability'
+                    }}
+                  </span>
 
-            <span class="addon-badge"
-                  *ngIf="p.mealPreference?.outbound">
-              🍽 Meal (Outbound):
-              {{ p.mealPreference.outbound | titlecase }}
-            </span>
+                  <span class="addon-badge">
+                    🍽 Meal:
+                    {{
+                      p.mealPreference?.outbound
+                        ? (p.mealPreference.outbound | titlecase)
+                        : 'No meal selected'
+                    }}
+                  </span>
 
-            <span class="addon-badge"
-                  *ngIf="p.mealPreference?.return">
-              🍽 Meal (Return):
-              {{ p.mealPreference.return | titlecase }}
-            </span>
+                  <span class="addon-badge">
+                    🧳 Baggage:
+                    {{ p.baggage?.outbound ? '+10kg Added' : 'No baggage selected' }}
+                  </span>
 
-            <span class="addon-badge"
-                  *ngIf="p.baggage?.outbound">
-              🧳 Baggage (Outbound):
-              +10kg Added
-            </span>
+                  <span class="addon-badge">
+                    🛡 Insurance:
+                    {{ bookingData?.insuranceSelected ? 'Added' : 'Not Added' }}
+                  </span>
+                </div>
+              </div>
 
-            <span class="addon-badge"
-                  *ngIf="p.baggage?.return">
-              🧳 Baggage (Return):
-              +10kg Added
-            </span>
+              <div class="prefs-group">
+                <div class="prefs-title">Return</div>
 
-            <span class="addon-badge">
-              🛡 Insurance:
-              {{ bookingData?.insuranceSelected ? 'Added' : 'Not Added' }}
-            </span>
+                <div class="prefs-badges">
+                  <span class="addon-badge">
+                    💺 Seat:
+                    {{
+                      p.seatPreference?.return
+                        ? (p.seatPreference.return | titlecase)
+                        : 'As per availability'
+                    }}
+                  </span>
+
+                  <span class="addon-badge">
+                    🍽 Meal:
+                    {{
+                      p.mealPreference?.return
+                        ? (p.mealPreference.return | titlecase)
+                        : 'No meal selected'
+                    }}
+                  </span>
+
+                  <span class="addon-badge">
+                    🧳 Baggage:
+                    {{ p.baggage?.return ? '+10kg Added' : 'No baggage selected' }}
+                  </span>
+
+                  <span class="addon-badge">
+                    🛡 Insurance:
+                    {{ bookingData?.insuranceSelected ? 'Added' : 'Not Added' }}
+                  </span>
+                </div>
+              </div>
+            </div>
 
           </ng-template>
 

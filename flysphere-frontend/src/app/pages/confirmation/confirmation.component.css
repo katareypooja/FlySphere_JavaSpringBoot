@@ -112,6 +112,7 @@
   gap: 24px;
   width: 100%;
   min-width: 0; /* allow grid children to shrink; prevents right overflow */
+  grid-auto-flow: dense; /* pack following full-width items upward if a cell is free */
 }
 
 /* ✅ Payment Summary (copied from Review page styles) */
@@ -138,6 +139,73 @@
   font-size: 14px;
   font-weight: 625;
   color: #17233e;
+}
+
+/* Booking Details dropdown (below Fare Breakdown) */
+.price-card.booking-card {
+  grid-column: 1 / -1; /* span full width below the passengers/fare row */
+  margin-top: 0px; /* keep close to Passengers even when Fare Summary expands */
+  border-radius: 12px;
+  border: 1px solid #dde3f1;
+  padding: 10px 12px;
+  box-shadow: none;
+  background: #fff;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.booking-details {
+  border: 0;
+}
+
+.booking-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  width: 100%;
+  padding: 0;
+}
+
+.booking-summary::-webkit-details-marker {
+  display: none;
+}
+
+.booking-details > .booking-summary::after {
+  content: '▾';
+  color: #7a859d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.booking-details[open] > .booking-summary::after {
+  content: '▴';
+}
+
+.booking-summary:hover h3,
+.booking-summary:hover .booking-meta {
+  color: #0f6efb;
+}
+
+.booking-summary h3 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.booking-meta {
+  font-size: 13px;
+  font-weight: 600;
+  color: #17233e;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.booking-body {
+  margin-top: 8px;
 }
 
 .price-card .row {

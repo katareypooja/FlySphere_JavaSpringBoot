@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -14,6 +15,12 @@ public class BookingDetailsResponseDto {
     private String bookingId;
     private Double totalAmount;
     private String status;
+
+    // ✅ Booking metadata + booker (User) details
+    private LocalDateTime bookedOn;
+    private String bookedByName;
+    private String userEmail;
+    private String userPhone;
 
     // ✅ Fare breakup for Fare Breakdown UI
     private Double baseTotal;
@@ -38,6 +45,7 @@ public class BookingDetailsResponseDto {
     @Data
     @Builder
     public static class PassengerDto {
+        private String title;
         private String firstName;
         private String lastName;
         private Integer age;

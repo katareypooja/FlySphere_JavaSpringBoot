@@ -1,6 +1,7 @@
 /* 🌍 Travel Background */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* NOTE: Removed external Google Font (Poppins) import to avoid Angular build font inlining
+   failures in restricted SSL/offline environments (unable to get local issuer certificate). */
 
 html, body {
   height: 100%;

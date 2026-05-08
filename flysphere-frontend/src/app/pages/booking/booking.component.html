@@ -292,27 +292,40 @@
         </div>
 
         <div class="form-grid">
-          <div class="floating-field">
-            <input type="text"
-                   [(ngModel)]="passenger.firstName"
-                   [ngClass]="{'invalid-field': isPassengerFieldInvalid(passenger.firstName)}"
-                   required>
-            <label>First Name</label>
-            <div class="field-error"
-                 *ngIf="formSubmitted && !passenger.firstName">
-              First name is required
+          <!-- ✅ Title + First Name + Last Name (single row group) -->
+          <div class="name-row">
+            <div class="floating-field title-field">
+              <select [(ngModel)]="passenger.title">
+                <option value="" disabled selected hidden></option>
+                <option value="Mr">Mr</option>
+                <option value="Ms">Ms</option>
+                <option value="Mrs">Mrs</option>
+              </select>
+              <label>Title</label>
             </div>
-          </div>
 
-          <div class="floating-field">
-            <input type="text"
-                   [(ngModel)]="passenger.lastName"
-                   [ngClass]="{'invalid-field': isPassengerFieldInvalid(passenger.lastName)}"
-                   required>
-            <label>Last Name</label>
-            <div class="field-error"
-                 *ngIf="formSubmitted && !passenger.lastName">
-              Last name is required
+            <div class="floating-field">
+              <input type="text"
+                     [(ngModel)]="passenger.firstName"
+                     [ngClass]="{'invalid-field': isPassengerFieldInvalid(passenger.firstName)}"
+                     required>
+              <label>First Name</label>
+              <div class="field-error"
+                   *ngIf="formSubmitted && !passenger.firstName">
+                First name is required
+              </div>
+            </div>
+
+            <div class="floating-field">
+              <input type="text"
+                     [(ngModel)]="passenger.lastName"
+                     [ngClass]="{'invalid-field': isPassengerFieldInvalid(passenger.lastName)}"
+                     required>
+              <label>Last Name</label>
+              <div class="field-error"
+                   *ngIf="formSubmitted && !passenger.lastName">
+                Last name is required
+              </div>
             </div>
           </div>
 

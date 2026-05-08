@@ -233,12 +233,19 @@ export class ConfirmationComponent implements OnInit {
   }
 
   formatBaggage(b: any): string {
-    if (!b) return 'No';
-    // In some responses this could already be "Yes" or "Yes (10kgs)" or a string.
-    const val = String(b);
-    if (val.toLowerCase() === 'true') return 'Yes (10 kgs)';
-    if (val.toLowerCase() === 'yes') return 'Yes (10 kgs)';
-    return this.titleCase(val);
+    // Show exactly "Baggage - No" when not selected
+    if (b == null) return 'Baggage - No';
+
+    const val = String(b).trim();
+    if (!val) return 'Baggage - No';
+
+    // Normalize common boolean-ish values
+    const lower = val.toLowerCase();
+    if (lower === 'false' || lower === 'no') return 'No extra baggage';
+    if (lower === 'true' || lower === 'yes') return 'Yes (+10 kgs) Baggage';
+
+    // If backend sends a string like "Yes (10 kgs)" / "10kg" etc, keep it but prefix with label
+    return `Baggage - ${this.titleCase(val)}`;
   }
 
   getOutboundAddonSummary(p: any): string {
