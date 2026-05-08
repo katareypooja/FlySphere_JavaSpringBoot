@@ -336,6 +336,29 @@
   align-items: start;
 }
 
+/* ✅ Title + First Name + Last Name in same row */
+.name-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 110px 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+  overflow: visible; /* allow label to render above without being cut */
+  padding-top: 12px; /* extra room so floating labels never touch/cut at top */
+}
+
+/* ✅ Ensure children don't shrink/wrap in narrow widths */
+.name-row > .floating-field {
+  min-width: 0;
+}
+
+/* ✅ Override form-grid child rule so .name-row stays as grid (not forced to flex-column) */
+.form-grid > .name-row {
+  display: grid;
+  flex-direction: unset;
+  gap: 12px;
+}
+
 /* Make DOB slightly compact */
 .floating-field input[type="date"] {
   height: 46px;
@@ -876,18 +899,20 @@
 .floating-field label {
   position: absolute;
   left: 16px;
-  top: 16px;
+  top: 12px; /* a bit higher to avoid clipping */
   font-size: 13px;
   color: #94a3b8;
   pointer-events: none;
   transition: all 0.2s ease;
   background: #ffffff;
   padding: 0 6px;
+  z-index: 1; /* keep label above input border */
 }
 
 .floating-field input:focus + label,
 .floating-field input:not(:placeholder-shown) + label,
 .floating-field select:focus + label,
+/* If the select has a real value (not empty), float the label */
 .floating-field select:not([value=""]) + label {
   top: -8px;
   font-size: 11px;
@@ -895,10 +920,42 @@
   font-weight: 600;
 }
 
+/* ✅ Title field: keep label like others and align control vertically */
+.title-field {
+  position: relative;
+}
+
+/* Make the select match other inputs' internal padding */
+.title-field select {
+  padding-top: 0;
+  padding-left: 16px;
+  padding-right: 36px; /* room for dropdown arrow */
+}
+
+/* Default label position (inside the box) */
+.title-field label {
+  top: 16px;
+}
+
+/* Float label on focus OR once user selected a title */
+.title-field select:focus + label,
+.title-field select:not([value=""]) + label {
+  top: -8px;
+  font-size: 11px;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+/* Slightly tweak select vertical centering so it aligns with input text */
+.title-field select {
+  line-height: 52px;
+  height: 52px;
+}
+
 /* Subtle premium divider above passenger form */
 .passenger-card .form-grid {
   margin-top: 10px;
-  padding-top: 18px;
+  padding-top: 28px; /* more room for floating labels in the first row */
   border-top: 1px solid #f1f5f9;
 }
 

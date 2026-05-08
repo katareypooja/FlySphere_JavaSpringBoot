@@ -475,6 +475,7 @@ public class BookingService {
         List<com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.PassengerDto> passengerDtos =
                 passengers.stream()
                         .map(p -> com.flysphere.flysphere_backend.dto.BookingDetailsResponseDto.PassengerDto.builder()
+                                .title(p.getTitle())
                                 .firstName(p.getFirstName())
                                 .lastName(p.getLastName())
                                 .age(p.getAge())
@@ -572,6 +573,17 @@ public class BookingService {
                 .bookingId(booking.getBookingId())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus())
+
+                // ✅ Booking created date (Booking table) + user details (User table)
+                .bookedOn(booking.getCreatedAt())
+                .bookedByName(booking.getUser() != null
+                        ? ((booking.getUser().getFirstName() != null ? booking.getUser().getFirstName() : "") +
+                        " " +
+                        (booking.getUser().getLastName() != null ? booking.getUser().getLastName() : "")).trim()
+                        : null)
+                .userEmail(booking.getUser() != null ? booking.getUser().getEmail() : null)
+                .userPhone(booking.getUser() != null ? booking.getUser().getPhone() : null)
+
                 .baseTotal((double) baseTotal)
                 .addonsTotal((double) addonsTotal)
                 .taxAmount((double) taxAmount)

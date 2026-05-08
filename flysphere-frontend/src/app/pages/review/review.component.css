@@ -113,6 +113,39 @@
   margin-top: 8px;
 }
 
+/* ✅ Group preferences by segment (Outbound / Return) */
+.prefs-groups {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.prefs-group {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 10px 12px;
+}
+
+.prefs-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.prefs-badges {
+  display: flex;
+  flex-wrap: nowrap; /* keep seat/meal/baggage/insurance on one line */
+  gap: 8px;
+  overflow-x: auto; /* if tight width, allow horizontal scroll instead of wrapping */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
 .addon-badge {
   background: #f1f5f9;
   color: #334155;
@@ -120,6 +153,15 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-weight: 500;
+  white-space: nowrap; /* prevent badge itself from breaking */
+  flex: 0 0 auto; /* keep each badge sized to its content */
+}
+
+/* ✅ Small screens: keep stacked (already stacked) */
+@media (max-width: 520px) {
+  .prefs-groups {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ✅ Pricing */

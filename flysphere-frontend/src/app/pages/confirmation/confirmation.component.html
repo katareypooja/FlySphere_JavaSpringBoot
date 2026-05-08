@@ -273,11 +273,11 @@
           <div class="passenger-accordion" *ngFor="let p of passengers; let i = index">
             <details class="passenger-details">
               <summary class="passenger-summary">
-                <span class="summary-name">Passenger {{ i + 1 }}: {{ p.firstName }} {{ p.lastName }}</span>
+                <span class="summary-name">Passenger {{ i + 1 }}: {{ p.title ? (p.title | titlecase) + '. ' : '' }}{{ p.firstName }} {{ p.lastName }}</span>
                 <span class="summary-meta">
                   <ng-container *ngIf="p.age">Age: {{ p.age }}</ng-container>
                   <ng-container *ngIf="p.age">&nbsp;•&nbsp;</ng-container>
-                  <span>Type: {{ p.type | titlecase }}</span>
+                  <span> {{ p.type | titlecase }}</span>
                 </span>
               </summary>
 
@@ -331,7 +331,7 @@
         <div class="price-card fare-card" *ngIf="totals">
           <details class="fare-details">
             <summary class="fare-summary">
-              <h3>Fare Breakdown</h3>
+              <h3>Fare Summary</h3>
               <span class="fare-grand">₹ {{ totals?.grandTotal | number:'1.0-0' }}</span>
             </summary>
 
@@ -365,6 +365,51 @@
             </div>
           </details>
         </div>
+      </div>
+
+      <!-- ✅ Booking Details breakdown below Fare Breakdown -->
+      <div class="price-card booking-card" *ngIf="bookingData">
+        <details class="booking-details">
+          <summary class="booking-summary">
+            <h3>Booking Details</h3>
+            <span class="booking-meta">
+              {{ bookingData?.bookedOn ? (bookingData?.bookedOn | date:'dd MMM yyyy') : '' }}
+            </span>
+          </summary>
+
+          <div class="booking-body">
+            <div class="row">
+              <span>Booked On</span>
+              <span>
+                {{
+                  bookingData?.bookedOn
+                    ? (bookingData?.bookedOn | date:'EEE, dd MMM yyyy, h:mm a')
+                    : '—'
+                }}
+              </span>
+            </div>
+
+            <div class="row">
+              <span>Booked By</span>
+              <span>{{ bookingData?.bookedByName || '—' }}</span>
+            </div>
+
+            <div class="row">
+              <span>Email</span>
+              <span>{{ bookingData?.userEmail || '—' }}</span>
+            </div>
+
+            <div class="row">
+              <span>Contact No</span>
+              <span>{{ bookingData?.userPhone || '—' }}</span>
+            </div>
+
+            <div class="row">
+              <span>Status</span>
+              <span>{{ bookingData?.status || '—' }}</span>
+            </div>
+          </div>
+        </details>
       </div>
 
       <!-- ✅ Divider line below passengers row -->
