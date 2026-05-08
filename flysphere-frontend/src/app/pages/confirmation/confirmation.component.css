@@ -9,7 +9,7 @@
 
 /* Single frame container */
 .confirmation-frame {
-  max-width: 960px;
+  max-width: 1200px; /* increased width so right column has more room */
   margin: 0 auto;
   background: #fff;
   border-radius: 14px;
@@ -67,6 +67,19 @@
   padding: 10px 14px;
   border-radius: 10px;
   background: #f7f9ff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.top-card.booking-ref-card {
+  border: 1px solid rgba(15, 110, 251, 0.35); /* thin blue border */
+  background: linear-gradient(135deg, #f7f9ff 0%, #ffffff 70%); /* light gradient */
+  box-shadow: 0 6px 16px rgba(15, 110, 251, 0.12);
+}
+
+.top-card.booking-ref-card:hover {
+  transform: translateY(-2px); /* hover lift */
+  border-color: rgba(15, 110, 251, 0.55);
+  box-shadow: 0 10px 22px rgba(15, 110, 251, 0.18);
 }
 
 .top-card .label {
@@ -124,14 +137,18 @@
   border: 1px solid #e5e7eb;
 }
 
-/* Make Fare Breakdown look like Passengers section container */
-.price-card.fare-card {
+/* Make Fare + Booking cards identical in sizing */
+.price-card.fare-card,
+.price-card.booking-card {
   border-radius: 12px;
   border: 1px solid #dde3f1;
-  padding: 10px 12px; /* reduced inner space */
+  padding: 10px 12px;
   box-shadow: none;
   background: #fff;
-  align-self: start; /* prevent stretching -> removes empty space */
+  align-self: start;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; /* ensure padding/border included in width */
 }
 
 .price-card h3 {
@@ -143,20 +160,13 @@
 
 /* Booking Details dropdown (below Fare Breakdown) */
 .price-card.booking-card {
-  grid-column: 1 / -1; /* span full width below the passengers/fare row */
-  margin-top: 0px; /* keep close to Passengers even when Fare Summary expands */
-  border-radius: 12px;
-  border: 1px solid #dde3f1;
-  padding: 10px 12px;
-  box-shadow: none;
-  background: #fff;
-  max-width: 100%;
-  width: 100%;
-  box-sizing: border-box;
+  margin-top: 0px; /* stacked inside right column */
 }
 
 .booking-details {
   border: 0;
+  display: block;
+  width: 100%;
 }
 
 .booking-summary {
@@ -236,6 +246,8 @@
 /* Fare Breakdown dropdown */
 .fare-details {
   border: 0;
+  display: block;
+  width: 100%;
 }
 
 .fare-summary {
@@ -539,6 +551,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative; /* for .duration-text positioning */
+  min-width: 70px;
 }
 
 /* hide the circular bullets between times */
@@ -557,6 +571,16 @@
   font-weight: 600;
   color: #9aa6c0;
   line-height: 1;
+}
+
+/* Duration label above the arrow (like reference screenshot) */
+.duration-text {
+  position: absolute;
+  transform: translateY(-28px);
+  font-size: 12px;
+  font-weight: 700;
+  color: #64718a;
+  white-space: nowrap;
 }
 
 /* Baggage row */
@@ -689,10 +713,29 @@
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 2fr 1fr; /* passengers left, fare right */
-  gap: 24px;
+  gap: 16px; /* slightly tighter gap */
   align-items: start;
   margin-top: 0;
 }
+
+/* Right column stack: Fare Summary + Booking Details */
+.right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* little gap between fare + booking */
+  align-self: start;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Ensure both cards take exactly the same width inside the right column */
+.right-stack > .price-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* remove old grid-column override; booking card is now inside .right-stack */
 
 /* Divider line below row */
 .confirmation-divider {

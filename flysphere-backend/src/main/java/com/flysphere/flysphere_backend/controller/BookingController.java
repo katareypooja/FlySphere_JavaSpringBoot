@@ -50,6 +50,9 @@ public class BookingController {
             java.time.LocalDate returnDate = null;
             java.time.LocalTime returnDepartureTime = null;
 
+            java.time.LocalDate returnArrivalDate = null;
+            java.time.LocalTime returnArrivalTime = null;
+
             String returnAirlineName = null;
             String returnFlightType = null;
 
@@ -59,6 +62,10 @@ public class BookingController {
                 returnArrival = returnSeg.getArrivalAirport();
                 returnDate = returnSeg.getDepartureDate();
                 returnDepartureTime = returnSeg.getDepartureTime();
+
+                returnArrivalDate = returnSeg.getArrivalDate();
+                returnArrivalTime = returnSeg.getArrivalTime();
+
                 returnAirlineName = returnSeg.getAirlineName();
                 returnFlightType = returnSeg.getFlightType();
             }
@@ -68,6 +75,19 @@ public class BookingController {
                             .firstName(p.getFirstName())
                             .lastName(p.getLastName())
                             .type(p.getType())
+                            .age(p.getAge())
+
+                            // Outbound add-ons
+                            .outboundSeatNo(p.getOutboundSeatNo())
+                            .outboundSeat(p.getOutboundSeat())
+                            .outboundMeal(p.getOutboundMeal())
+                            .outboundBaggage(p.getOutboundBaggage())
+
+                            // Return add-ons
+                            .returnSeatNo(p.getReturnSeatNo())
+                            .returnSeat(p.getReturnSeat())
+                            .returnMeal(p.getReturnMeal())
+                            .returnBaggage(p.getReturnBaggage())
                             .build())
                     .toList();
 
@@ -82,11 +102,15 @@ public class BookingController {
                     .arrivalAirport(outbound.getArrivalAirport())
                     .departureDate(outbound.getDepartureDate())
                     .departureTime(outbound.getDepartureTime())
+                    .arrivalDate(outbound.getArrivalDate())
+                    .arrivalTime(outbound.getArrivalTime())
 
                     .returnDepartureAirport(returnDeparture)
                     .returnArrivalAirport(returnArrival)
                     .returnDate(returnDate)
                     .returnDepartureTime(returnDepartureTime)
+                    .returnArrivalDate(returnArrivalDate)
+                    .returnArrivalTime(returnArrivalTime)
 
                     .outboundAirlineName(outbound.getAirlineName())
                     .outboundFlightType(outbound.getFlightType())

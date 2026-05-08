@@ -510,6 +510,7 @@ public class BookingService {
                                 .arrivalAirport(s.getFlight().getArrivalAirport())
                                 .departureDate(s.getFlight().getDepartureDate())
                                 .departureTime(s.getFlight().getDepartureTime())
+                                .arrivalDate(s.getFlight().getArrivalDate())
                                 .arrivalTime(s.getFlight().getArrivalTime())
                                 .build()
                 ).toList();

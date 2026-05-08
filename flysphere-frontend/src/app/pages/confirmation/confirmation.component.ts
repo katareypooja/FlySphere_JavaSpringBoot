@@ -18,6 +18,62 @@ export class ConfirmationComponent implements OnInit {
   passengers: any[] = [];
   totals: any;
 
+  /* ================= DURATION (DEP -> ARR) ================= */
+  private parseDateTimeMs(dateStr?: string | null, timeStr?: string | null): number | null {
+    if (!dateStr) return null;
+
+    // dateStr: "YYYY-MM-DD"
+    const [y, m, d] = String(dateStr)
+      .split('-')
+      .map((v) => parseInt(v, 10));
+
+    let hh = 0;
+    let mm = 0;
+    let ss = 0;
+
+    if (timeStr && String(timeStr).trim().length > 0) {
+      const parts = String(timeStr)
+        .split(':')
+        .map((v) => parseInt(v, 10));
+      hh = parts[0] ?? 0;
+      mm = parts[1] ?? 0;
+      ss = parts[2] ?? 0;
+    }
+
+    return new Date(y, (m ?? 1) - 1, d ?? 1, hh, mm, ss, 0).getTime();
+  }
+
+  getDurationText(flight: any): string {
+    if (!flight) return '—';
+
+    const depMs = this.parseDateTimeMs(flight?.departureDate, flight?.departureTime);
+    if (depMs == null) return '—';
+
+    // Prefer arrivalDate if backend sends it, else assume same day as departure.
+    let arrMs = this.parseDateTimeMs(
+      flight?.arrivalDate || flight?.departureDate,
+      flight?.arrivalTime
+    );
+
+    if (arrMs == null) return '—';
+
+    // Handle overnight (arrival time earlier than departure time) when arrivalDate isn't provided.
+    const arrivalDateProvided = !!flight?.arrivalDate;
+    if (!arrivalDateProvided && arrMs < depMs) {
+      arrMs += 24 * 60 * 60 * 1000;
+    }
+
+    let diffMs = arrMs - depMs;
+    if (diffMs < 0) diffMs = 0;
+
+    const totalMinutes = Math.round(diffMs / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
+  }
+
   private computeFareBreakup(params: {
     grandTotal: number;
     passengers: any[];
