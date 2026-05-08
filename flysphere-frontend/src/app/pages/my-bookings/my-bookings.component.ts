@@ -107,6 +107,8 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
               </div>
               <div class="trip-date">
                 {{ booking.departureDate | date:'dd MMM yyyy' }} • {{ booking.departureTime || '—' }}
+                <br>
+                {{ booking.arrivalDate || booking.departureDate | date:'dd MMM yyyy' }} • {{ booking.arrivalTime || '—' }}
               </div>
             </div>
 
@@ -121,6 +123,8 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
                 </div>
                 <div class="trip-date">
                   {{ booking.departureDate | date:'dd MMM yyyy' }} • {{ booking.departureTime || '—' }}
+                  <br>
+                  {{ booking.arrivalDate || booking.departureDate | date:'dd MMM yyyy' }} • {{ booking.arrivalTime || '—' }}
                 </div>
               </div>
 
@@ -135,6 +139,8 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
                 </div>
                 <div class="trip-date">
                   {{ booking.returnDate | date:'dd MMM yyyy' }} • {{ booking.returnDepartureTime || '—' }}
+                  <br>
+                  {{ booking.returnArrivalDate || booking.returnDate | date:'dd MMM yyyy' }} • {{ booking.returnArrivalTime || '—' }}
                 </div>
               </div>
             </div>
@@ -142,28 +148,10 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
 
           <!-- Facts + Passengers -->
           <div class="facts-row">
-            <div class="cabin-col">
-              <div class="fact" *ngIf="!booking.returnDepartureAirport">
-                <span class="fact-label">Cabin</span>
-                <span class="badge-pill">
-                  {{ booking.cabinClass ? booking.cabinClass : 'Economy' }}
-                </span>
-              </div>
-
-              <!-- ✅ Round trip cabin inline at left -->
-              <div class="fact fact-round-cabin-inline" *ngIf="booking.returnDepartureAirport">
-                <span class="fact-label">Cabin</span>
-                <span class="badge-pill">
-                  Outbound: {{ booking.outboundCabinClass || booking.cabinClass || 'Economy' }}
-                </span>
-                <span class="badge-pill">
-                  Return: {{ booking.returnCabinClass || booking.cabinClass || 'Economy' }}
-                </span>
-              </div>
-            </div>
 
             <details class="passenger-details passenger-details-compact">
               <summary class="passenger-summary">
+                <span class="passenger-icon" aria-hidden="true" style="color:#929497;">👤</span>
                 <span class="passenger-title">Passengers</span>
                 <span class="passenger-count">({{ booking.passengerCount ?? (booking.passengers?.length ?? 0) }})</span>
                 <span class="summary-meta">View</span>
@@ -171,8 +159,29 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
 
               <div class="passenger-list" *ngIf="booking.passengers?.length; else noPassengers">
                 <div class="passenger-pill" *ngFor="let p of booking.passengers">
-                  <span class="passenger-name">{{ p.firstName }} {{ p.lastName }}</span>
-                  <span class="pill-type">({{ p.type | titlecase }})</span>
+                  <div class="pill-top">
+                    <span class="passenger-name">
+                      {{ formatTitle(p) }} {{ p.firstName }} {{ p.lastName }}
+                    </span>
+                    <span class="pill-sep">.</span>
+                    <span class="pill-age" *ngIf="p.age != null">Age:{{ p.age }}</span>
+                    <span class="pill-sep">.</span>
+                    <span class="pill-type">{{ p.type | titlecase }}</span>
+                  </div>
+
+                  <div class="pill-sub">
+                    <span class="sub-label">Outbound:</span>
+                    <span class="sub-value">
+                      {{ formatCabin(booking, 'outbound') }} • Seat: {{ formatSeat(p.outboundSeat, p.outboundSeatNo) }} • Meal: {{ formatMeal(p.outboundMeal) }} • Baggage: {{ formatBaggage(p.outboundBaggage) }}
+                    </span>
+                  </div>
+
+                  <div class="pill-sub" *ngIf="booking.tripType === 'round'">
+                    <span class="sub-label">Return:</span>
+                    <span class="sub-value">
+                      {{ formatCabin(booking, 'return') }} • Seat: {{ formatSeat(p.returnSeat, p.returnSeatNo) }} • Meal: {{ formatMeal(p.returnMeal) }} • Baggage: {{ formatBaggage(p.returnBaggage) }}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -531,9 +540,10 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     }
 
     .trip-date {
-      font-size: 14px;
+      font-size: 12px;
       color: #4b5563;
       margin-top: 0;
+      line-height: 1.35;
     }
 
     .facts-row {
@@ -545,13 +555,6 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       flex-wrap: nowrap;
     }
 
-    .cabin-col {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-      flex: 1 1 auto;
-    }
-
     .fact {
       display: flex;
       align-items: center;
@@ -559,10 +562,6 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       font-size: 13px;
       color: #334155;
       flex-wrap: wrap;
-    }
-
-    .fact-round-cabin-inline {
-      gap: 10px;
     }
 
     .fact-label {
@@ -599,10 +598,10 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     }
 
     .passenger-details-compact {
-      flex: 0 0 auto;
-      min-width: 220px;
-      max-width: 340px;
-      margin-left: auto;
+      flex: 1;              /* ✅ allow passengers section to take more space */
+      min-width: 520px;     /* ✅ enough room to keep Outbound/Return in one line */
+      max-width: 100%;
+      margin-left: 0; /* ✅ keep passenger section on the left */
     }
 
     .passenger-summary {
@@ -613,9 +612,9 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       list-style: none;
       font-size: 13px;
       color: #0f172a; /* same as Cabin text */
-      font-weight: 700;
+      font-weight: 500;
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      border: 0;
       border-radius: 12px;
       padding: 10px 12px;
     }
@@ -653,14 +652,50 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     .passenger-pill {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 999px;
-      padding: 6px 10px;
+      border-radius: 14px;
+      padding: 10px 12px;
       font-size: 12px;
       font-weight: 700;
       color: #0f172a; /* same as Cabin */
-      display: inline-flex;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .pill-top {
+      display: flex;
+      flex-wrap: wrap;
       gap: 6px;
       align-items: baseline;
+    }
+
+    .pill-sep {
+      font-weight: 900;
+      color: #cbd5e1;
+    }
+
+    .pill-age {
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .pill-sub {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;   /* ✅ keep label + value on same line */
+      line-height: 1.35;
+      white-space: nowrap; /* ✅ keep outbound/return content on one line */
+    }
+
+    .sub-label {
+      color: #64748b;
+      font-weight: 800;
+    }
+
+    .sub-value {
+      color: #64748b;
+      font-weight: 700;
     }
 
     .passenger-name {
@@ -669,9 +704,18 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     }
 
     .pill-type {
-      font-weight: 700;
-      color: #0f172a; /* same as Cabin */
-      opacity: 0.7;
+      font-weight: 800;
+      color: #64748b;
+      opacity: 1;
+    }
+
+    .passenger-icon {
+      font-size: 14px;
+      line-height: 1;
+      margin-right: 2px;
+      display: inline-block;
+      filter: opacity(1); /* avoid browser quirks */
+      color: #929497 !important;
     }
 
     .passenger-empty {
@@ -708,7 +752,7 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
     .footer-total-value {
       font-size: 14px;
       font-weight: 600;
-      color: #1a1b1f;
+      color: #64748b;
       white-space: nowrap;
     }
 
@@ -894,6 +938,65 @@ export class MyBookingsComponent implements OnInit {
     this.statusFilter = '';
     this.currentPage = 0;
     this.fetchBookings();
+  }
+
+  /* ================= PASSENGER FORMATTERS (My Bookings) ================= */
+
+  // No title stored in backend yet; using UI default as per requirement.
+  formatTitle(_p: any): string {
+    return 'Ms';
+  }
+
+  formatCabin(booking: any, leg: 'outbound' | 'return'): string {
+    if (!booking) return '—';
+
+    const tripType = String(booking.tripType ?? '').toLowerCase();
+    const toTitle = (v: any) => this.titleCase(String(v ?? '').replace(/_/g, ' '));
+
+    if (tripType === 'round') {
+      const val = leg === 'outbound' ? booking.outboundCabinClass : booking.returnCabinClass;
+      return val ? toTitle(val) : '—';
+    }
+
+    // one-way
+    return booking.cabinClass ? toTitle(booking.cabinClass) : '—';
+  }
+
+  formatSeat(seatType: any, seatNo: any): string {
+    const no = seatNo ? String(seatNo) : '';
+    const type = seatType ? String(seatType) : '';
+
+    if (!type && !no) return '—';
+    if (!type && no) return `*(${no})`;
+
+    return no ? `${this.titleCase(type)} (${no})` : this.titleCase(type);
+  }
+
+  formatMeal(meal: any): string {
+    if (!meal) return 'No Meal';
+    return this.titleCase(String(meal));
+  }
+
+  formatBaggage(b: any): string {
+    if (b == null) return 'No';
+
+    const val = String(b).trim();
+    if (!val) return 'No';
+
+    const lower = val.toLowerCase();
+    if (lower === 'false' || lower === 'no') return 'No';
+    if (lower === 'true' || lower === 'yes') return 'Yes (+10 kgs)';
+
+    // fallback
+    return this.titleCase(val);
+  }
+
+  private titleCase(input: string): string {
+    if (!input) return input;
+    return input
+      .split(' ')
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w))
+      .join(' ');
   }
 
   viewDetails(bookingId: string) {

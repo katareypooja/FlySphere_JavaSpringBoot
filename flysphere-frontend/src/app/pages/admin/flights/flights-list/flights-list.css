@@ -63,6 +63,7 @@
   width: 260px;
   font-size: 14px;
   outline: none;
+  margin:0;
   background: rgba(255, 255, 255, 0.95);
 }
 

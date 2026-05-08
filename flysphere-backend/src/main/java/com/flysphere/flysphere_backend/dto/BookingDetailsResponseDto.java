@@ -74,11 +74,14 @@ public class BookingDetailsResponseDto {
     public static class FlightSegmentDto {
         private String airlineName;
         private String flightNo;
-        private String flightType;     // ✅ From flighttype column
+        private String flightType;
         private String departureAirport;
         private String arrivalAirport;
         private LocalDate departureDate;
         private LocalTime departureTime;
+
+        // ✅ needed for My Bookings page to show arrival date/time
+        private LocalDate arrivalDate;
         private LocalTime arrivalTime;
     }
 }
