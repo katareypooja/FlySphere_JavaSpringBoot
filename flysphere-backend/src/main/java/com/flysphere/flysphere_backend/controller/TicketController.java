@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,15 +54,22 @@ public class TicketController {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
 
-        /* ================= SOFT GRADIENT BACKGROUND ================= */
-        content.setNonStrokingColor(new Color(242, 247, 255));
+        /* ================= PAGE BACKGROUND (WHITE) ================= */
+        content.setNonStrokingColor(Color.WHITE);
         content.addRect(0, 0, width, height);
         content.fill();
         content.setNonStrokingColor(Color.BLACK);
 
-        /* ================= WATERMARK ================= */
+        /* ================= WATERMARK (LIGHT) ================= */
         content.saveGraphicsState();
-        content.setNonStrokingColor(new Color(200, 220, 255)); // light blue watermark
+
+        // Transparency for watermark
+        PDExtendedGraphicsState gs = new PDExtendedGraphicsState();
+        gs.setNonStrokingAlphaConstant(0.06f); // light watermark
+        content.setGraphicsStateParameters(gs);
+
+        // Very light blue-grey watermark text
+        content.setNonStrokingColor(new Color(30, 64, 175));
         content.setFont(PDType1Font.HELVETICA_BOLD, 90);
 
         content.beginText();
@@ -72,30 +80,25 @@ public class TicketController {
                         height / 3
                 )
         );
-        content.showText("FlySphere");
+        content.showText("FLYSPHERE");
         content.endText();
 
         content.restoreGraphicsState();
 
-        /* ================= HEADER BAND ================= */
-        content.setNonStrokingColor(new Color(214, 228, 248));
+        /* ================= HEADER BAND (BLUE #799ae1) ================= */
+        content.setNonStrokingColor(new Color(121, 154, 225)); // #799ae1
         content.addRect(0, height - 115, width, 115);
         content.fill();
-        content.setNonStrokingColor(Color.BLACK);
 
-        // Brand Header with Flight Icon + Blue Color (#2563eb)
-        content.setNonStrokingColor(new Color(37, 99, 235));
+        // Header text in white for contrast
+        content.setNonStrokingColor(Color.WHITE);
+
+        // Brand Header
         content.setFont(PDType1Font.HELVETICA_BOLD, 26);
-
-        // FlySphere text (Unicode removed to prevent PDFBox font error)
         write(content, "FlySphere", margin, y);
 
-        content.setNonStrokingColor(new Color(100, 110, 120)); // Soft grey subtitle
         content.setFont(PDType1Font.HELVETICA, 12);
         write(content, "Secure Booking", margin + 2, y - 18);
-
-        // Reset color for rest
-        content.setNonStrokingColor(Color.BLACK);
 
         content.setFont(PDType1Font.HELVETICA_BOLD, 16);
         write(content, "E-Ticket", width / 2 - 40, y - 2);
@@ -104,6 +107,9 @@ public class TicketController {
         write(content, "Booking Ref", width - 170, y + 5);
         content.setFont(PDType1Font.HELVETICA_BOLD, 15);
         write(content, booking.getBookingId(), width - 170, y - 15);
+
+        // Reset color for rest of document
+        content.setNonStrokingColor(Color.BLACK);
 
         y -= 50;
         y -= 35;
@@ -222,11 +228,11 @@ public class TicketController {
 
             // ✅ Removed separate seat block (now handled in 5th column above)
 
-            y -= 28;
+            y -= 18;
 
             // spacing between stacked segments
             if (segments.size() > 1 && i < segments.size() - 1) {
-                y -= 10;
+                y -= 4;
             }
         }
 
@@ -237,6 +243,7 @@ public class TicketController {
         write(content, "Passenger Details", margin, y);
         content.setNonStrokingColor(Color.BLACK);
         y -= 12;
+        // Keep underline under Passenger Details heading (as in round-trip screenshot)
         drawSoftLine(content, margin, y, width - margin);
         y -= 20;
 
@@ -250,59 +257,53 @@ public class TicketController {
 
         boolean isRound = "round".equalsIgnoreCase(booking.getTripType());
 
-        float pCol1 = col1;                                   // Name
-        float pCol2 = margin + usableWidth * 0.18f;           // Age
-        float pCol3 = margin + usableWidth * 0.28f;           // Type
-        float pCol4 = margin + usableWidth * 0.40f;           // Seat Outbound
-        float pCol5 = margin + usableWidth * 0.62f;           // Seat Return (only round)
-        float pCol6 = margin + usableWidth * (isRound ? 0.82f : 0.70f); // Contact shifts if one-way
+        // Page-break threshold (start a new page if we go below this)
+        float minY = 120;
 
-        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
-        write(content, "Name", pCol1, y);
-        write(content, "Age", pCol2, y);
-        write(content, "Type", pCol3, y);
-        write(content, "Seat (Outbound)", pCol4, y);
+        for (int pi = 0; pi < passengerList.size(); pi++) {
+            com.flysphere.flysphere_backend.model.Passenger p = passengerList.get(pi);
 
-        if (isRound) {
-            write(content, "Seat (Return)", pCol5, y);
-        }
+            // Each passenger consumes ~70-95px depending on one-way/round-trip.
+            float needed = isRound ? 95 : 75;
 
-        write(content, "Contact No", pCol6, y);
+            if (y - needed < minY) {
+                content.close();
 
-        y -= 16;
-        content.setFont(PDType1Font.HELVETICA, 11);
+                PDPage nextPage = new PDPage(PDRectangle.A4);
+                document.addPage(nextPage);
+                content = new PDPageContentStream(document, nextPage);
 
-        for (com.flysphere.flysphere_backend.model.Passenger p : passengerList) {
+                // Background + watermark only (NO HEADER on next pages)
+                drawTicketPageBackgroundAndWatermark(content, width, height);
 
-            write(content, trim(p.getFirstName() + " " + p.getLastName(), 20), pCol1, y);
-            write(content, String.valueOf(p.getAge()), pCol2, y);
-            write(content, p.getType(), pCol3, y);
+                // reset y
+                y = height - 75;
 
-            String outboundSeatDisplay = "";
-            if (p.getOutboundSeat() != null && p.getOutboundSeatNo() != null) {
-                outboundSeatDisplay = p.getOutboundSeat() + " (" + p.getOutboundSeatNo() + ")";
-            } else if (p.getOutboundSeatNo() != null) {
-                outboundSeatDisplay = "*(" + p.getOutboundSeatNo() + ")";
+                // Optional small section title on next pages (no header band)
+                content.setNonStrokingColor(new Color(37, 99, 235));
+                content.setFont(PDType1Font.HELVETICA_BOLD, 15);
+                write(content, "Passenger Details (Cont.)", margin, y);
+                content.setNonStrokingColor(Color.BLACK);
+                y -= 12;
+                drawSoftLine(content, margin, y, width - margin);
+                y -= 18;
             }
-
-            write(content, trim(outboundSeatDisplay, 20), pCol4, y);
 
             if (isRound) {
-                String returnSeatDisplay = "";
-                if (p.getReturnSeat() != null && p.getReturnSeatNo() != null) {
-                    returnSeatDisplay = p.getReturnSeat() + " (" + p.getReturnSeatNo() + ")";
-                } else if (p.getReturnSeatNo() != null) {
-                    returnSeatDisplay = "*(" + p.getReturnSeatNo() + ")";
-                }
-                write(content, trim(returnSeatDisplay, 20), pCol5, y);
+                y = drawPassengerBlockRoundTrip(content, p, y, margin, usableWidth);
+            } else {
+                y = drawPassengerBlockOneWay(content, p, y, margin, usableWidth);
             }
 
-            write(content, trim(p.getPhone(), 15), pCol6, y);
-
-            y -= 16;
+            // Draw a separator ONLY between passengers (not after the last passenger)
+            if (pi < passengerList.size() - 1) {
+                drawSoftLine(content, margin, y, margin + usableWidth);
+                y -= 14;
+            }
         }
 
-        y -= 25;
+        // Add a little vertical gap before Fare Breakdown (matches spacing used before section headers)
+        y -= 10;
 
         /* ================= FARE BREAKDOWN ================= */
         content.setNonStrokingColor(new Color(37, 99, 235));
@@ -310,7 +311,8 @@ public class TicketController {
         write(content, "Fare Breakdown", margin, y);
         content.setNonStrokingColor(Color.BLACK);
         y -= 12;
-        drawSoftLine(content, margin, y, width - margin);  // ✅ separator below title
+        // keep only the section’s internal separator; no extra line between passenger section and fare section
+        drawSoftLine(content, margin, y, width - margin);  // separator below title
         y -= 25;
 
         content.setFont(PDType1Font.HELVETICA_BOLD, 11);
@@ -388,6 +390,212 @@ public class TicketController {
         content.newLineAtOffset(x, y);
         content.showText(text);
         content.endText();
+    }
+
+    private void drawTicketPageBackgroundAndWatermark(PDPageContentStream content, float width, float height)
+            throws Exception {
+        // White background
+        content.setNonStrokingColor(Color.WHITE);
+        content.addRect(0, 0, width, height);
+        content.fill();
+
+        // Light watermark
+        content.saveGraphicsState();
+
+        PDExtendedGraphicsState gs = new PDExtendedGraphicsState();
+        gs.setNonStrokingAlphaConstant(0.06f);
+        content.setGraphicsStateParameters(gs);
+
+        content.setNonStrokingColor(new Color(30, 64, 175));
+        content.setFont(PDType1Font.HELVETICA_BOLD, 90);
+
+        content.beginText();
+        content.setTextMatrix(
+                org.apache.pdfbox.util.Matrix.getRotateInstance(
+                        Math.toRadians(45),
+                        width / 4,
+                        height / 3
+                )
+        );
+        content.showText("FLYSPHERE");
+        content.endText();
+
+        content.restoreGraphicsState();
+
+        content.setNonStrokingColor(Color.BLACK);
+    }
+
+    private float drawPassengerBlockOneWay(
+            PDPageContentStream content,
+            com.flysphere.flysphere_backend.model.Passenger p,
+            float y,
+            float margin,
+            float usableWidth
+    ) throws Exception {
+        // Row 1: Name | Age | Type | Contact No
+        float col1 = margin;
+        float col2 = margin + usableWidth * 0.22f;
+        float col3 = margin + usableWidth * 0.40f;
+        float col4 = margin + usableWidth * 0.60f;
+
+        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+        write(content, "Name", col1, y);
+        write(content, "Age", col2, y);
+        write(content, "Type", col3, y);
+        write(content, "Contact No", col4, y);
+
+        y -= 14;
+
+        content.setFont(PDType1Font.HELVETICA, 11);
+        write(content, trim(p.getFirstName() + " " + p.getLastName(), 28), col1, y);
+        write(content, p.getAge() != null ? String.valueOf(p.getAge()) : "—", col2, y);
+        write(content, trim(p.getType(), 10), col3, y);
+        write(content, trim(p.getPhone(), 18), col4, y);
+
+        y -= 18;
+
+        // Row 2: Seat | Meal | Bag | Insurance | Email
+        float c1 = margin;
+        float c2 = margin + usableWidth * 0.22f;
+        float c3 = margin + usableWidth * 0.40f;
+        float c4 = margin + usableWidth * 0.60f;
+        float c5 = margin + usableWidth * 0.80f;
+
+        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+        write(content, "Seat", c1, y);
+        write(content, "Meal", c2, y);
+        write(content, "Baggage", c3, y);
+        write(content, "Insurance", c4, y);
+        write(content, "Email", c5, y);
+
+        y -= 14;
+
+        content.setFont(PDType1Font.HELVETICA, 11);
+
+        String seatDisplay = "";
+        if (p.getOutboundSeat() != null && p.getOutboundSeatNo() != null) {
+            seatDisplay = p.getOutboundSeat() + " (" + p.getOutboundSeatNo() + ")";
+        } else if (p.getOutboundSeatNo() != null) {
+            seatDisplay = "*(" + p.getOutboundSeatNo() + ")";
+        } else if (p.getOutboundSeat() != null) {
+            seatDisplay = p.getOutboundSeat();
+        }
+
+        String insurance = Boolean.TRUE.equals(p.getInsuranceSelected()) ? "Yes covered" : "No covered";
+
+        write(content, trim(seatDisplay, 14), c1, y);
+        write(content, trim(formatMeal(p.getOutboundMeal()), 14), c2, y);
+        write(content, trim(formatBaggage(p.getOutboundBaggage()), 14), c3, y);
+        write(content, insurance, c4, y);
+        write(content, trim(p.getEmail(), 30), c5, y);
+
+        y -= 22;
+
+        return y;
+    }
+
+    private float drawPassengerBlockRoundTrip(
+            PDPageContentStream content,
+            com.flysphere.flysphere_backend.model.Passenger p,
+            float y,
+            float margin,
+            float usableWidth
+    ) throws Exception {
+        // Row 1: Name | Age | Type | Contact No
+        float col1 = margin;
+        float col2 = margin + usableWidth * 0.26f;
+        float col3 = margin + usableWidth * 0.52f;
+        float col4 = margin + usableWidth * 0.78f;
+
+        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+        write(content, "Name", col1, y);
+        write(content, "Age", col2, y);
+        write(content, "Type", col3, y);
+        write(content, "Contact No", col4, y);
+
+        y -= 14;
+
+        content.setFont(PDType1Font.HELVETICA, 11);
+        write(content, trim(p.getFirstName() + " " + p.getLastName(), 28), col1, y);
+        write(content, p.getAge() != null ? String.valueOf(p.getAge()) : "—", col2, y);
+        write(content, trim(p.getType(), 10), col3, y);
+        write(content, trim(p.getPhone(), 18), col4, y);
+
+        y -= 18;
+
+        // Row 2: Out Seat | Out Meal | Out Bag | Email
+        float c1 = margin;
+        float c2 = margin + usableWidth * 0.26f;
+        float c3 = margin + usableWidth * 0.52f;
+        float c4 = margin + usableWidth * 0.78f;
+
+        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+        write(content, "Outound Seat", c1, y);
+        write(content, "Outbound Meal", c2, y);
+        write(content, "Outbound Baggage", c3, y);
+        write(content, "Email", c4, y);
+
+        y -= 14;
+
+        content.setFont(PDType1Font.HELVETICA, 11);
+
+        String outSeatDisplay = "";
+        if (p.getOutboundSeat() != null && p.getOutboundSeatNo() != null) {
+            outSeatDisplay = p.getOutboundSeat() + " (" + p.getOutboundSeatNo() + ")";
+        } else if (p.getOutboundSeatNo() != null) {
+            outSeatDisplay = "*(" + p.getOutboundSeatNo() + ")";
+        } else if (p.getOutboundSeat() != null) {
+            outSeatDisplay = p.getOutboundSeat();
+        }
+
+        write(content, trim(outSeatDisplay, 18), c1, y);
+        write(content, trim(formatMeal(p.getOutboundMeal()), 18), c2, y);
+        write(content, trim(formatBaggage(p.getOutboundBaggage()), 18), c3, y);
+        write(content, trim(p.getEmail(), 34), c4, y);
+
+        y -= 18;
+
+        // Row 3: Ret Seat | Ret Meal | Ret Bag | Insurance
+        content.setFont(PDType1Font.HELVETICA_BOLD, 11);
+        write(content, "Return Seat", c1, y);
+        write(content, "Return Meal", c2, y);
+        write(content, "Return Baggage", c3, y);
+        write(content, "Insurance", c4, y);
+
+        y -= 14;
+
+        content.setFont(PDType1Font.HELVETICA, 11);
+
+        String retSeatDisplay = "";
+        if (p.getReturnSeat() != null && p.getReturnSeatNo() != null) {
+            retSeatDisplay = p.getReturnSeat() + " (" + p.getReturnSeatNo() + ")";
+        } else if (p.getReturnSeatNo() != null) {
+            retSeatDisplay = "*(" + p.getReturnSeatNo() + ")";
+        } else if (p.getReturnSeat() != null) {
+            retSeatDisplay = p.getReturnSeat();
+        }
+
+        String insurance = Boolean.TRUE.equals(p.getInsuranceSelected()) ? "Yes covered" : "Not covered";
+
+        write(content, trim(retSeatDisplay, 18), c1, y);
+        write(content, trim(formatMeal(p.getReturnMeal()), 18), c2, y);
+        write(content, trim(formatBaggage(p.getReturnBaggage()), 18), c3, y);
+        write(content, insurance, c4, y);
+
+        y -= 22;
+
+        return y;
+    }
+
+    private String formatMeal(String meal) {
+        if (meal == null || meal.trim().isEmpty()) return "No meal";
+        return trim(meal.trim(), 18);
+    }
+
+    private String formatBaggage(String baggage) {
+        if (baggage == null || baggage.trim().isEmpty()) return "Baggage No";
+        // Per requirement: if baggage exists => show fixed label
+        return "Yes (+10kgs)";
     }
 
     private void drawLine(PDPageContentStream content, float startX, float y, float endX) throws Exception {
