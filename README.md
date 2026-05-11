@@ -140,6 +140,87 @@ http://localhost:4200
 - Booking
 - Passenger
 - BookingSegment
+## `flightmgtable` table (Columns: 20)
+
+- `flightid` integer
+- `airlinename` varchar(100)
+- `flighttype` varchar(100)
+- `flightno` varchar(20)
+- `departureairport` varchar(10)
+- `arrivalairport` varchar(10)
+- `departuredate` date
+- `arrivaldate` date
+- `departuretime` time without time zone
+- `arrivaltime` time without time zone
+- `totaleconomyseats` integer
+- `totalbusinessseats` integer
+- `totalfirstclassseats` integer
+- `economyadultfare` double precision
+- `economychildfare` double precision
+- `businessadultfare` double precision
+- `businesschildfare` double precision
+- `firstadultfare` double precision
+- `firstchildfare` double precision
+- `flightstatus` varchar(50)
+## `users` table (Columns: 10)
+
+- `userid` varchar(50)
+- `firstname` varchar(50)
+- `lastname` varchar(50)
+- `phone` varchar(15)
+- `email` varchar(100)
+- `password` varchar(255)
+- `role` varchar(20)
+- `id` bigint
+- `created_at` timestamp(6) without time zone
+- `updated_at` timestamp(6) without time zone
+## `passengers` table (Columns: 20)
+
+- `id` bigint
+- `booking_id` bigint
+- `title` varchar(10)
+- `first_name` varchar(50)
+- `last_name` varchar(50)
+- `age` integer
+- `type` varchar(10)
+- `created_at` timestamp(6) without time zone
+- `updated_at` timestamp(6) without time zone
+- `outbound_seat` varchar(50)
+- `outbound_meal` varchar(50)
+- `outbound_baggage` varchar(50)
+- `return_seat` varchar(50)
+- `return_meal` varchar(50)
+- `return_baggage` varchar(50)
+- `insurance_selected` boolean
+- `email` varchar(255)
+- `phone` varchar(20)
+- `outbound_seat_no` varchar(20)
+- `return_seat_no` varchar(20)
+## `booking_segments` table (Columns: 6)
+
+- `id` bigint
+- `booking_id` varchar(20)
+- `segment_no` integer
+- `flight_id` integer
+- `created_at` timestamp(6) without time zone
+- `updated_at` timestamp(6) without time zone
+## `bookings` table (Columns: 15)
+
+- `id` bigint
+- `booking_id` varchar(20)
+- `user_id` varchar(255)
+- `flight_id` integer
+- `total_amount` double precision
+- `status` varchar(20)
+- `created_at` timestamp(6) without time zone
+- `updated_at` timestamp(6) without time zone
+- `cabin_class` varchar(255)
+- `outbound_cabin_class` varchar(255)
+- `return_cabin_class` varchar(255)
+- `trip_type` varchar(255)
+- `contact_phone` varchar(255)
+- `contact_email` varchar(255)
+- `insurance_selected` boolean
 
 ---
 
