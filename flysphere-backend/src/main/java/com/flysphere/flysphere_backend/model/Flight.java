@@ -77,6 +77,4 @@ public class Flight {
     @Column(name = "flightstatus")
     private String flightStatus;
 
-    @Column(name = "aircraft_type")
-    private String aircraftType;
 }
