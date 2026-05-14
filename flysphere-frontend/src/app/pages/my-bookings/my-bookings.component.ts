@@ -31,6 +31,7 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
             <option value="">All Status</option>
             <option value="CONFIRMED">CONFIRMED</option>
             <option value="CANCELLED">CANCELLED</option>
+            <option value="COMPLETED">COMPLETED</option>
           </select>
 
           <button (click)="resetFilters()" class="reset-btn">Reset</button>
@@ -89,8 +90,8 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
 
             <div class="booking-header-right">
               <div class="status-badge"
-                   [ngClass]="getStatusClass(booking.status)">
-                {{ booking.status }}
+                   [ngClass]="getStatusClass(getDerivedStatus(booking))">
+                {{ getDerivedStatus(booking) }}
               </div>
             </div>
           </div>
@@ -492,6 +493,10 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       background: #f59e0b;
     }
 
+    .status-completed {
+      background: #0ea5e9; /* blue for completed */
+    }
+
     .route-section {
       margin: 15px 0;
       padding: 12px 16px;
@@ -869,13 +874,44 @@ export class MyBookingsComponent implements OnInit {
       url += `&bookingId=${this.searchBookingId}`;
     }
 
+    // Derived statuses mean backend doesn't know COMPLETED.
+    // For Upcoming tab we allow CONFIRMED/CANCELLED (pass through to backend).
+    // For Past tab we allow CANCELLED only (COMPLETED will be derived client-side).
     if (this.statusFilter) {
-      url += `&status=${this.statusFilter}`;
+      const f = this.statusFilter.toUpperCase();
+      const isDerivedCompleted = f === 'COMPLETED';
+
+      if (this.activeTab === 'UPCOMING') {
+        if (!isDerivedCompleted) {
+          url += `&status=${f}`;
+        }
+      } else {
+        // PAST
+        if (f === 'CANCELLED') {
+          url += `&status=${f}`;
+        }
+      }
     }
 
     this.http.get<any>(url).subscribe({
       next: (data) => {
-        this.bookings = data?.content ?? [];
+        const raw: any[] = data?.content ?? [];
+
+        // Ensure the correct tab even if backend filter uses departure time:
+        // Past/Upcoming is based on arrival time per requirement.
+        const tabFiltered = raw.filter((b) =>
+          this.activeTab === 'PAST' ? this.isPastBooking(b) : !this.isPastBooking(b)
+        );
+
+        // Apply derived-status filter on top
+        const statusFiltered =
+          this.statusFilter && this.statusFilter.trim().length > 0
+            ? tabFiltered.filter(
+                (b) => this.getDerivedStatus(b) === this.statusFilter.toUpperCase()
+              )
+            : tabFiltered;
+
+        this.bookings = statusFiltered;
         this.totalPages = data?.totalPages ?? 0;
 
         const start = Math.max(0, this.currentPage - 1);
@@ -916,9 +952,79 @@ export class MyBookingsComponent implements OnInit {
       .toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric'});
   }
 
+  private toLocalDateTimeMsFromParts(dateVal: any, timeVal?: any): number | null {
+    if (!dateVal) return null;
+
+    let y: number | undefined;
+    let m: number | undefined;
+    let d: number | undefined;
+
+    if (typeof dateVal === 'string') {
+      const parts = dateVal.split('-').map((v) => parseInt(v, 10));
+      y = parts[0];
+      m = parts[1];
+      d = parts[2];
+    } else if (typeof dateVal === 'object') {
+      y = dateVal.year ?? dateVal.y;
+      m = dateVal.month ?? dateVal.m;
+      d = dateVal.day ?? dateVal.dayOfMonth ?? dateVal.d;
+    }
+
+    if (!y || !m || !d) return null;
+
+    let hh = 0;
+    let mm = 0;
+    let ss = 0;
+
+    if (typeof timeVal === 'string' && timeVal.trim()) {
+      const t = timeVal.split(':').map((v) => parseInt(v, 10));
+      hh = t[0] ?? 0;
+      mm = t[1] ?? 0;
+      ss = t[2] ?? 0;
+    } else if (timeVal && typeof timeVal === 'object') {
+      hh = timeVal.hour ?? 0;
+      mm = timeVal.minute ?? 0;
+      ss = timeVal.second ?? 0;
+    }
+
+    return new Date(y, m - 1, d, hh, mm, ss, 0).getTime();
+  }
+
+  private getArrivalMs(booking: any): number | null {
+    if (!booking) return null;
+
+    const tripType = String(booking.tripType ?? '').toLowerCase();
+    if (tripType === 'round') {
+      const ms = this.toLocalDateTimeMsFromParts(
+        booking.returnArrivalDate ?? booking.returnDate,
+        booking.returnArrivalTime ?? booking.returnDepartureTime
+      );
+      if (ms != null) return ms;
+    }
+
+    return this.toLocalDateTimeMsFromParts(
+      booking.arrivalDate ?? booking.departureDate,
+      booking.arrivalTime ?? booking.departureTime
+    );
+  }
+
+  isPastBooking(booking: any): boolean {
+    const arrivalMs = this.getArrivalMs(booking);
+    if (arrivalMs == null) return false;
+    return arrivalMs < Date.now();
+  }
+
+  getDerivedStatus(booking: any): 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' {
+    const baseStatus = String(booking?.status ?? '').toUpperCase();
+    if (baseStatus === 'CANCELLED') return 'CANCELLED';
+    return this.isPastBooking(booking) ? 'COMPLETED' : 'CONFIRMED';
+  }
+
   getStatusClass(status: string): string {
-    if (status === 'CONFIRMED') return 'status-confirmed';
-    if (status === 'CANCELLED') return 'status-cancelled';
+    const s = String(status ?? '').toUpperCase();
+    if (s === 'CONFIRMED') return 'status-confirmed';
+    if (s === 'CANCELLED') return 'status-cancelled';
+    if (s === 'COMPLETED') return 'status-completed';
     return 'status-pending';
   }
 
