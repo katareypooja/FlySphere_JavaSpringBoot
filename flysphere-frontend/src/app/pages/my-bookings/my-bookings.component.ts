@@ -70,8 +70,27 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
           </div>
         </div>
 
-        <div *ngIf="!loading && bookings.length === 0" class="empty">
-          You have no bookings yet.
+        <div *ngIf="!loading && bookings.length === 0" class="empty empty-state">
+          <div class="empty-title">{{ getEmptyState().title }}</div>
+          <div class="empty-subtitle" *ngIf="getEmptyState().subtitle">
+            {{ getEmptyState().subtitle }}
+          </div>
+
+          <div class="empty-actions">
+            <button
+              *ngIf="getEmptyState().primaryAction === 'SEARCH'"
+              class="btn btn-outline"
+              (click)="goToSearch()">
+              Search Flights
+            </button>
+
+            <button
+              *ngIf="getEmptyState().primaryAction === 'RESET_FILTERS'"
+              class="btn btn-outline"
+              (click)="resetFilters()">
+              Clear Filters
+            </button>
+          </div>
         </div>
 
         <div *ngFor="let booking of bookings; let i = index" class="booking-row">
@@ -826,6 +845,38 @@ import { BookingNavbarComponent } from '../../shared/booking-navbar/booking-navb
       opacity: 0.4;
       cursor: not-allowed;
     }
+
+    /* ✅ Empty state */
+    .empty-state {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      padding: 26px 22px;
+      text-align: center;
+      color: #0f172a;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .empty-subtitle {
+      font-size: 13px;
+      color: #475569;
+      font-weight: 600;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    .empty-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
   `]
 })
 export class MyBookingsComponent implements OnInit {
@@ -1044,6 +1095,66 @@ export class MyBookingsComponent implements OnInit {
     this.statusFilter = '';
     this.currentPage = 0;
     this.fetchBookings();
+  }
+
+  private hasActiveFilters(): boolean {
+    return (
+      (!!this.searchBookingId && this.searchBookingId.trim().length > 0) ||
+      (!!this.statusFilter && this.statusFilter.trim().length > 0)
+    );
+  }
+
+  getEmptyState(): {
+    title: string;
+    subtitle?: string;
+    primaryAction?: 'SEARCH' | 'RESET_FILTERS';
+  } {
+    const tab = this.activeTab;
+    const status = (this.statusFilter ?? '').trim().toUpperCase();
+    const bookingId = (this.searchBookingId ?? '').trim();
+
+    // Filters used => no results message
+    if (this.hasActiveFilters()) {
+      // Special case: Past + Confirmed
+      if (tab === 'PAST' && status === 'CONFIRMED') {
+        return {
+          title: 'No confirmed bookings in Past',
+          subtitle: 'Past confirmed trips are shown as COMPLETED. Select COMPLETED to view them.',
+          primaryAction: 'RESET_FILTERS'
+        };
+      }
+
+      const subtitle = bookingId
+        ? 'Check the Booking ID or clear the search.'
+        : status
+          ? 'Try a different status filter.'
+          : 'Try clearing the filters.';
+
+      return {
+        title: 'No results found',
+        subtitle,
+        primaryAction: 'RESET_FILTERS'
+      };
+    }
+
+    // No filters => tab specific empty state
+    if (tab === 'UPCOMING') {
+      return {
+        title: 'No upcoming bookings',
+        subtitle: 'When you book a flight, it will appear here.',
+        primaryAction: 'SEARCH'
+      };
+    }
+
+    return {
+      title: 'No past bookings',
+      subtitle: 'Completed or cancelled trips will show here.'
+    };
+  }
+
+  goToSearch() {
+    // route existing search page
+    this.router.navigate(['/search']);
   }
 
   /* ================= PASSENGER FORMATTERS (My Bookings) ================= */
